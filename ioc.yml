@@ -1,0 +1,135 @@
+# =============================================================================
+# ioc.yml — IOC, hash, and indicator formatting triggers
+# Place in: ~/.config/espanso/match/
+# =============================================================================
+
+imports:
+  - "shared-vars.yml"
+
+matches:
+
+  # ---------------------------------------------------------------------------
+  # Defanged IP placeholder — e.g. 192[.]168[.]1[.]1
+  # Pastes a defanged placeholder to fill in
+  # ---------------------------------------------------------------------------
+  - trigger: ":defip"
+    replace: "{{clipboard}}"
+    vars:
+      - name: clipboard
+        type: shell
+        params:
+          # Reads clipboard, replaces dots with [.] for defanging
+          cmd: "pbpaste | sed 's/\\.\\([0-9]\\)/[.]\\1/g; s/^\\([0-9]\\)/\\1/'"
+          # Linux alternative (comment out pbpaste line and use this):
+          # cmd: "xclip -o -selection clipboard | sed 's/\\.\\([0-9]\\)/[.]\\1/g'"
+
+  # ---------------------------------------------------------------------------
+  # Defanged URL placeholder — rewrites http to hxxp, defangs dots
+  # ---------------------------------------------------------------------------
+  - trigger: ":defurl"
+    replace: "{{clipboard}}"
+    vars:
+      - name: clipboard
+        type: shell
+        params:
+          cmd: "pbpaste | sed 's/http/hxxp/g; s/\\.\\([a-zA-Z]\\)/[.]\\1/g'"
+          # Linux: cmd: "xclip -o -selection clipboard | sed 's/http/hxxp/g; s/\\.\\([a-zA-Z]\\)/[.]\\1/g'"
+
+  # ---------------------------------------------------------------------------
+  # IOC block template — paste into tickets, reports, chat
+  # ---------------------------------------------------------------------------
+  - trigger: ":iocblock"
+    replace: |
+      IOC Details
+      -----------
+      Type:       [IP / Domain / URL / Hash / Email]
+      Value:      
+      First Seen: 
+      Last Seen:  
+      Confidence: [High / Medium / Low]
+      Source:     
+      Context:    
+
+  # ---------------------------------------------------------------------------
+  # Hash type reference — quick paste when documenting file indicators
+  # ---------------------------------------------------------------------------
+  - trigger: ":hashblock"
+    replace: |
+      MD5:    
+      SHA1:   
+      SHA256: 
+
+  # ---------------------------------------------------------------------------
+  # CIDR notation reminder — common private ranges
+  # ---------------------------------------------------------------------------
+  - trigger: ":rfc1918"
+    replace: "10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16"
+
+  # ---------------------------------------------------------------------------
+  # VirusTotal URL prefix — paste then append hash/IP/domain
+  # ---------------------------------------------------------------------------
+  - trigger: ":vt"
+    replace: "https://www.virustotal.com/gui/search/"
+
+  # ---------------------------------------------------------------------------
+  # MDE deep link prefix — file hash pivot in Defender portal
+  # ---------------------------------------------------------------------------
+  - trigger: ":mdesha"
+    replace: "https://security.microsoft.com/file/"
+
+  # ---------------------------------------------------------------------------
+  # Shodan search prefix
+  # ---------------------------------------------------------------------------
+  - trigger: ":shodan"
+    replace: "https://www.shodan.io/search?query="
+
+  # ---------------------------------------------------------------------------
+  # AbuseIPDB lookup prefix — append IP
+  # ---------------------------------------------------------------------------
+  - trigger: ":abuseipdb"
+    replace: "https://www.abuseipdb.com/check/"
+
+  # ---------------------------------------------------------------------------
+  # urlscan.io search prefix
+  # ---------------------------------------------------------------------------
+  - trigger: ":urlscan"
+    replace: "https://urlscan.io/search/#"
+
+  # ---------------------------------------------------------------------------
+  # MISP event search prefix — instance URL set in shared-vars.yml
+  # ---------------------------------------------------------------------------
+  - trigger: ":misp"
+    replace: "{{misp_instance}}/events/index/searchall:"
+
+  # ---------------------------------------------------------------------------
+  # AlienVault OTX indicator search prefix
+  # ---------------------------------------------------------------------------
+  - trigger: ":otx"
+    replace: "https://otx.alienvault.com/indicator/ip/"
+
+  # ---------------------------------------------------------------------------
+  # Cisco Talos reputation lookup prefix
+  # ---------------------------------------------------------------------------
+  - trigger: ":talos"
+    replace: "https://talosintelligence.com/reputation_center/lookup?search="
+
+  # ---------------------------------------------------------------------------
+  # NVD CVE detail page prefix — append CVE-YYYY-NNNNN
+  # ---------------------------------------------------------------------------
+  - trigger: ":cveurl"
+    replace: "https://nvd.nist.gov/vuln/detail/"
+
+  # ---------------------------------------------------------------------------
+  # Threat intelligence summary block — paste into reports
+  # ---------------------------------------------------------------------------
+  - trigger: ":threatintel"
+    replace: |
+      Threat Intelligence Summary
+      ----------------------------
+      Threat Actor / Family:
+      Associated Campaign:
+      TTPs (MITRE ATT&CK):
+      Known IOCs:
+      Confidence Level:   [High / Medium / Low]
+      Source(s):
+      Relevance to Org:

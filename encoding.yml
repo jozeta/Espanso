@@ -1,0 +1,68 @@
+# =============================================================================
+# encoding.yml — Encoding / decoding utility triggers
+# Place in: ~/.config/espanso/match/
+# Covers: URL, hex, base32, JWT, HTML entity encode/decode, email defang
+# (Base64 encode/decode lives in cli.yml as :b64enc / :b64dec)
+# =============================================================================
+
+matches:
+
+  # ---------------------------------------------------------------------------
+  # URL
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":urlencode"
+    replace: "[uri]::EscapeDataString('')"
+
+  - trigger: ":urldecode"
+    replace: "[uri]::UnescapeDataString('')"
+
+  # ---------------------------------------------------------------------------
+  # HEX
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":hexencode"
+    replace: "([Text.Encoding]::UTF8.GetBytes('') | ForEach-Object { $_.ToString('x2') }) -join ''"
+
+  - trigger: ":hexdecode"
+    replace: "-join (('' -split '(..)' | Where-Object { $_ }) | ForEach-Object { [char][convert]::ToInt32($_,16) })"
+
+  # ---------------------------------------------------------------------------
+  # BASE32
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":b32enc"
+    replace: "python3 -c \"import base64;print(base64.b32encode(b''))\""
+
+  - trigger: ":b32dec"
+    replace: "python3 -c \"import base64;print(base64.b32decode(''))\""
+
+  # ---------------------------------------------------------------------------
+  # HTML ENTITIES
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":htmlencode"
+    replace: "[System.Net.WebUtility]::HtmlEncode('')"
+
+  - trigger: ":htmldecode"
+    replace: "[System.Net.WebUtility]::HtmlDecode('')"
+
+  # ---------------------------------------------------------------------------
+  # JWT
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":jwtdecode"
+    replace: "echo '<JWT>' | cut -d '.' -f2 | base64 -d 2>/dev/null | jq ."
+
+  # ---------------------------------------------------------------------------
+  # EMAIL DEFANG — reads clipboard, e.g. user@domain.com -> user[at]domain[.]com
+  # ---------------------------------------------------------------------------
+  - trigger: ":defemail"
+    replace: "{{clipboard}}"
+    vars:
+      - name: clipboard
+        type: shell
+        params:
+          cmd: "pbpaste | sed 's/@/[at]/; s/\\.\\([a-zA-Z]\\)/[.]\\1/g'"
+          # Linux alternative (comment out pbpaste line and use this):
+          # cmd: "xclip -o -selection clipboard | sed 's/@/[at]/; s/\\.\\([a-zA-Z]\\)/[.]\\1/g'"

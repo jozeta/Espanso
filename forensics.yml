@@ -1,0 +1,168 @@
+# =============================================================================
+# forensics.yml — Digital forensics & incident response (DFIR) triggers
+# Place in: ~/.config/espanso/match/
+# Covers: evidence handling, memory forensics, disk/timeline, log parsing,
+#         Windows artifacts, YARA / Sigma rule stubs
+# =============================================================================
+
+matches:
+
+  # ---------------------------------------------------------------------------
+  # EVIDENCE HANDLING
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":coc"
+    replace: |
+      Chain of Custody
+      -----------------
+      Item Description:
+      Item ID / Serial:
+      Collected By:
+      Collected From:
+      Date/Time Collected (UTC):
+      Hash (SHA256):
+      Storage Location:
+      Transferred To:               [Name / Date / Signature]
+
+  - trigger: ":evidlog"
+    replace: |
+      Evidence Log Entry
+      -------------------
+      Evidence ID:
+      Description:
+      Source Host/User:
+      Acquired By:
+      Acquisition Method:           [Live / Offline / Cloud export]
+      Hash (SHA256):
+      Notes:
+
+  - trigger: ":hashverify"
+    replace: "certutil -hashfile evidence.img SHA256"
+
+  # ---------------------------------------------------------------------------
+  # DISK / MEMORY ACQUISITION
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":ddimage"
+    replace: "dd if=/dev/sdX of=evidence.img bs=4M conv=noerror,sync status=progress"
+
+  - trigger: ":dcfldd"
+    replace: "dcfldd if=/dev/sdX of=evidence.img hash=sha256 hashlog=evidence.sha256"
+
+  - trigger: ":ftkimage"
+    replace: "ftkimager /dev/sdX evidence --e01 --case-number INC-XXXX --examiner \"\""
+
+  # ---------------------------------------------------------------------------
+  # MEMORY FORENSICS — Volatility 3
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":volpslist"
+    replace: "vol.py -f memory.dmp windows.pslist"
+
+  - trigger: ":volpstree"
+    replace: "vol.py -f memory.dmp windows.pstree"
+
+  - trigger: ":volnetscan"
+    replace: "vol.py -f memory.dmp windows.netscan"
+
+  - trigger: ":volmalfind"
+    replace: "vol.py -f memory.dmp windows.malfind"
+
+  - trigger: ":voldump"
+    replace: "vol.py -f memory.dmp windows.dumpfiles --pid "
+
+  # ---------------------------------------------------------------------------
+  # TIMELINE / LOG ANALYSIS
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":plaso"
+    replace: "log2timeline.py timeline.plaso /path/to/evidence"
+
+  - trigger: ":psort"
+    replace: "psort.py -o l2tcsv timeline.plaso -w timeline.csv"
+
+  - trigger: ":evtxparse"
+    replace: "evtxparse.py -o csv Security.evtx"
+
+  - trigger: ":prefetchparse"
+    replace: "PECmd.exe -d C:\\Windows\\Prefetch --csv output_dir"
+
+  - trigger: ":amcacheparse"
+    replace: "AmcacheParser.exe -f Amcache.hve --csv output_dir"
+
+  - trigger: ":shimcache"
+    replace: "AppCompatCacheParser.exe -f SYSTEM --csv output_dir"
+
+  - trigger: ":regripper"
+    replace: "rip.pl -r NTUSER.DAT -f ntuser > ntuser_output.txt"
+
+  - trigger: ":sysmonproc"
+    replace: |
+      // Sysmon Event ID 1 — Process Creation
+      DeviceProcessEvents
+      | where Timestamp > ago(24h)
+      | where FileName =~ ""
+      | project Timestamp, DeviceName, InitiatingProcessFileName, FileName, ProcessCommandLine, SHA256
+
+  - trigger: ":timelineentry"
+    replace: "| [YYYY-MM-DD HH:MM:SS UTC] | [Host] | [Artifact Source] | [Event Description] |"
+
+  - trigger: ":artifactloc"
+    replace: |
+      Common Windows Artifact Locations
+      -----------------------------------
+      Prefetch:        C:\Windows\Prefetch\*.pf
+      Amcache:          C:\Windows\AppCompat\Programs\Amcache.hve
+      ShimCache:        SYSTEM hive — ControlSet\Control\Session Manager\AppCompatCache
+      Event Logs:       C:\Windows\System32\winevt\Logs\*.evtx
+      MFT:              C:\$MFT
+      UserAssist:       NTUSER.DAT — Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist
+      Run Keys:         Software\Microsoft\Windows\CurrentVersion\Run
+      Recent Files:     C:\Users\<user>\AppData\Roaming\Microsoft\Windows\Recent
+      Jump Lists:       C:\Users\<user>\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations
+
+  # ---------------------------------------------------------------------------
+  # YARA / SIGMA
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":yarascan"
+    replace: "yara -r rules.yar /path/to/scan"
+
+  - trigger: ":yarastub"
+    replace: |
+      rule RuleName
+      {
+          meta:
+              author = ""
+              description = ""
+              date = ""
+              reference = ""
+
+          strings:
+              $s1 = "" ascii wide
+              $hex1 = { }
+
+          condition:
+              any of them
+      }
+
+  - trigger: ":sigmastub"
+    replace: |
+      title:
+      id:
+      status: experimental
+      description:
+      references:
+          -
+      author:
+      date:
+      logsource:
+          category:
+          product:
+      detection:
+          selection:
+              FieldName:
+          condition: selection
+      falsepositives:
+          - Unknown
+      level: medium

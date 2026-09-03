@@ -1,0 +1,53 @@
+# =============================================================================
+# vulnmgmt.yml — Vulnerability management triggers
+# Place in: ~/.config/espanso/match/
+# =============================================================================
+
+matches:
+
+  - trigger: ":cvsscalc"
+    replace: "https://www.first.org/cvss/calculator/3.1"
+
+  - trigger: ":epssref"
+    replace: "https://www.first.org/epss/"
+
+  - trigger: ":kevref"
+    replace: "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
+
+  - trigger: ":patchticket"
+    replace: |
+      Patch Management Ticket
+      --------------------------
+      CVE(s):
+      Affected Systems:
+      Patch Available:      [Y/N — version]
+      Exploitation Status:  [PoC / Weaponized / KEV listed / None known]
+      Target Patch Date:
+      Rollback Plan:
+      Testing Notes:
+
+  - trigger: ":vulnreport"
+    replace: |
+      Vulnerability Scan Report Summary
+      ------------------------------------
+      Scan Date:
+      Scanner / Tool:
+      Scope:
+      Critical:
+      High:
+      Medium:
+      Low:
+      Top Findings:
+        -
+
+  - trigger: ":riskaccept"
+    replace: |
+      Risk Acceptance / Exception Request
+      ---------------------------------------
+      Risk Description:
+      Affected Asset(s):
+      Business Justification:
+      Compensating Controls:
+      Residual Risk Rating:  [Critical / High / Medium / Low]
+      Accepted By:
+      Review Date:

@@ -1,0 +1,37 @@
+# =============================================================================
+# ctf.yml — CTF-specific triggers
+# Place in: ~/.config/espanso/match/
+# =============================================================================
+
+matches:
+
+  - trigger: ":flagformat"
+    replace: "flag{}"
+
+  - trigger: ":encchain"
+    replace: "Common encoding chain to try: Base64 -> Hex -> ROT13 -> Base32 -> URL-decode -> Binary/ASCII"
+
+  - trigger: ":stringsflag"
+    replace: "strings -n 8 file | grep -i flag"
+
+  - trigger: ":binwalkextract"
+    replace: "binwalk -e file.bin"
+
+  - trigger: ":steghideextract"
+    replace: "steghide extract -sf image.jpg"
+
+  - trigger: ":exiftoolread"
+    replace: "exiftool file.jpg"
+
+  - trigger: ":ctfwriteup"
+    replace: |
+      CTF Writeup
+      -------------
+      Challenge Name:
+      Category:        [Web / Pwn / Crypto / Forensics / Rev / Misc]
+      Points:
+      Description:
+      Approach:
+      Solution:
+      Flag:
+      Lessons Learned:

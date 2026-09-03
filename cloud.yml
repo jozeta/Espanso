@@ -1,0 +1,66 @@
+# =============================================================================
+# cloud.yml — Multi-cloud security command triggers (AWS, GCP)
+# Place in: ~/.config/espanso/match/
+# Note: Azure CLI / Entra ID triggers live in cli.yml.
+# =============================================================================
+
+matches:
+
+  # ---------------------------------------------------------------------------
+  # AWS
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":awswhoami"
+    replace: "aws sts get-caller-identity"
+
+  - trigger: ":awsiamusers"
+    replace: "aws iam list-users --query 'Users[].[UserName,CreateDate]' --output table"
+
+  - trigger: ":awsiamkeys"
+    replace: "aws iam list-access-keys --user-name "
+
+  - trigger: ":awss3public"
+    replace: "aws s3api get-bucket-acl --bucket <bucket-name>"
+
+  - trigger: ":awss3block"
+    replace: "aws s3api get-public-access-block --bucket <bucket-name>"
+
+  - trigger: ":awscloudtrail"
+    replace: "aws cloudtrail lookup-events --lookup-attributes AttributeKey=Username,AttributeValue=<user> --max-results 50"
+
+  - trigger: ":awsguardduty"
+    replace: "aws guardduty list-findings --detector-id <detector-id>"
+
+  - trigger: ":awssg"
+    replace: "aws ec2 describe-security-groups --filters Name=ip-permission.cidr,Values=0.0.0.0/0 --output table"
+
+  - trigger: ":awsassumerole"
+    replace: "aws sts assume-role --role-arn <role-arn> --role-session-name ir-session"
+
+  - trigger: ":awsconfigcompliance"
+    replace: "aws configservice get-compliance-summary-by-config-rule"
+
+  # ---------------------------------------------------------------------------
+  # GCP
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":gcpauth"
+    replace: "gcloud auth login"
+
+  - trigger: ":gcpproject"
+    replace: "gcloud config set project <project-id>"
+
+  - trigger: ":gcpiam"
+    replace: "gcloud projects get-iam-policy <project-id> --format=json"
+
+  - trigger: ":gcplogging"
+    replace: "gcloud logging read resource.type=gce_instance --limit 50 --format json"
+
+  - trigger: ":gcpassets"
+    replace: "gcloud asset search-all-resources --scope=projects/<project-id>"
+
+  - trigger: ":gcpbucketiam"
+    replace: "gcloud storage buckets describe gs://<bucket-name> --format=default(iamConfiguration)"
+
+  - trigger: ":gcpscc"
+    replace: "gcloud scc findings list <organization-id> --filter=state=ACTIVE"

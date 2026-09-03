@@ -1,0 +1,237 @@
+# =============================================================================
+# incidents.yml — Incident response and ticket phrase triggers
+# Place in: ~/.config/espanso/match/
+# =============================================================================
+
+imports:
+  - "shared-vars.yml"
+
+matches:
+
+  # ---------------------------------------------------------------------------
+  # Incident header block — paste at top of any incident note/ticket
+  # ---------------------------------------------------------------------------
+  - trigger: ":inchead"
+    replace: |
+      Incident ID:   {{ticket_prefix}}
+      Title:
+      Severity:      [Critical / High / Medium / Low]
+      Status:        [Open / In Progress / Contained / Closed]
+      Assigned To:   
+      Opened:        
+      Last Updated:  
+      Summary:       
+
+  # ---------------------------------------------------------------------------
+  # Timeline entry — single line, paste repeatedly to build a timeline
+  # ---------------------------------------------------------------------------
+  - trigger: ":tl"
+    replace: "| [DD Mon YYYY HH:MM UTC] | [Actor/System] | [Action/Observation] |"
+
+  # ---------------------------------------------------------------------------
+  # Full timeline table header + first row
+  # ---------------------------------------------------------------------------
+  - trigger: ":timeline"
+    replace: |
+      | Timestamp (UTC)          | Actor / System | Event / Observation |
+      |--------------------------|----------------|---------------------|
+      | DD Mon YYYY HH:MM UTC    |                |                     |
+
+  # ---------------------------------------------------------------------------
+  # Containment actions block
+  # ---------------------------------------------------------------------------
+  - trigger: ":contain"
+    replace: |
+      Containment Actions
+      -------------------
+      [ ] Isolate host via MDE
+      [ ] Disable Entra ID account
+      [ ] Revoke active sessions / tokens
+      [ ] Block IOCs in Defender / Sentinel
+      [ ] Notify stakeholders
+      [ ] Preserve evidence (logs, memory, disk)
+
+  # ---------------------------------------------------------------------------
+  # Investigation status update — for Teams/email/ticket updates
+  # ---------------------------------------------------------------------------
+  - trigger: ":sitrep"
+    replace: |
+      SITREP — [DD Mon YYYY HH:MM UTC]
+      Status:   [In Progress / Contained / Monitoring]
+      Summary:  
+      Actions Taken:
+        - 
+      Next Steps:
+        - 
+      ETA for Next Update: 
+
+  # ---------------------------------------------------------------------------
+  # False positive closure note
+  # ---------------------------------------------------------------------------
+  - trigger: ":fp"
+    replace: "Closing as False Positive. Investigation confirmed no malicious activity. Rationale: "
+
+  # ---------------------------------------------------------------------------
+  # True positive escalation note
+  # ---------------------------------------------------------------------------
+  - trigger: ":tp"
+    replace: "Confirmed True Positive. Escalating to Incident Response. Evidence: "
+
+  # ---------------------------------------------------------------------------
+  # MITRE ATT&CK reference inline tag
+  # ---------------------------------------------------------------------------
+  - trigger: ":mitre"
+    replace: "[MITRE ATT&CK: TXXXX.XXX — Technique Name]"
+
+  # ---------------------------------------------------------------------------
+  # Severity rating line — drop into any finding or ticket
+  # ---------------------------------------------------------------------------
+  - trigger: ":sev"
+    replace: "Severity: [Critical / High / Medium / Low] | CVSSv3: X.X | Risk: [Immediate Action / Scheduled Remediation / Accept]"
+
+  # ---------------------------------------------------------------------------
+  # Affected assets block
+  # ---------------------------------------------------------------------------
+  - trigger: ":assets"
+    replace: |
+      Affected Assets
+      ---------------
+      Hostname:
+      IP Address:
+      OS:
+      Owner:
+      Entra ID:
+      MDE Device ID:
+
+  # ---------------------------------------------------------------------------
+  # Phishing report intake template
+  # ---------------------------------------------------------------------------
+  - trigger: ":phishreport"
+    replace: |
+      Phishing Report Intake
+      -----------------------
+      Reported By:
+      Date Received:
+      Sender Address:
+      Subject:
+      Recipients:
+      Attachments:    [Y/N — list]
+      Links:
+      Headers Reviewed: [Y/N]
+      Sandbox Verdict:
+      Action Taken:   [Blocked sender / Purged from mailboxes / User notified]
+
+  # ---------------------------------------------------------------------------
+  # Ransomware initial response checklist
+  # ---------------------------------------------------------------------------
+  - trigger: ":ransomplaybook"
+    replace: |
+      Ransomware — Initial Response Checklist
+      ----------------------------------------
+      [ ] Isolate affected hosts from network (do not power off — preserve memory)
+      [ ] Identify patient zero and initial access vector
+      [ ] Disable affected user accounts and revoke sessions
+      [ ] Preserve ransom note, encrypted sample files, and logs
+      [ ] Check backups — verify integrity and isolation from infected network
+      [ ] Identify ransomware family (ID Ransomware / MDE detection name)
+      [ ] Engage legal / insurance / executive stakeholders
+      [ ] Determine data exfiltration scope before encryption
+      [ ] Do NOT negotiate or pay without executive + legal sign-off
+      [ ] Begin eradication plan once scope is fully contained
+
+  # ---------------------------------------------------------------------------
+  # Stakeholder communication template
+  # ---------------------------------------------------------------------------
+  - trigger: ":commstemplate"
+    replace: |
+      Subject: [Security Incident Update — {{ticket_prefix}}XXXX]
+
+      Audience: [Executive / All Staff / Affected Users]
+      Classification: [Internal / Confidential]
+
+      Summary:
+      What Happened:
+      Current Impact:
+      Actions Taken:
+      What You Need To Do:
+      Next Update By:
+
+  # ---------------------------------------------------------------------------
+  # Lessons learned / post-incident review template
+  # ---------------------------------------------------------------------------
+  - trigger: ":lessons"
+    replace: |
+      Post-Incident Review — {{ticket_prefix}}XXXX
+      --------------------------------
+      What Happened:
+      Timeline Summary:
+      What Went Well:
+      What Could Improve:
+      Root Cause:
+      Corrective Actions:      [Owner / Due Date]
+      Detection Gap Identified: [Y/N — details]
+      Follow-Up Review Date:
+
+  # ---------------------------------------------------------------------------
+  # Escalation matrix reference
+  # ---------------------------------------------------------------------------
+  - trigger: ":escalation"
+    replace: |
+      Escalation Matrix
+      ------------------
+      P1 / Critical — Immediate call to IR Lead + CISO, 15 min response SLA
+      P2 / High     — Page on-call analyst, 1 hr response SLA
+      P3 / Medium   — Ticket + Slack/Teams alert, 4 hr response SLA
+      P4 / Low      — Ticket queue, next business day
+
+  # ---------------------------------------------------------------------------
+  # Data breach / regulatory notification draft
+  # ---------------------------------------------------------------------------
+  - trigger: ":breachnotif"
+    replace: |
+      DRAFT — Regulatory Breach Notification (review with Legal before sending)
+      ---------------------------------------------------------------------------
+      Date of Discovery:
+      Date of Breach (est.):
+      Nature of Breach:
+      Data Categories Affected:
+      Number of Individuals Affected:
+      Containment Actions Taken:
+      Notification Deadline (per regulation):
+      Regulator(s) to Notify:
+
+  # ---------------------------------------------------------------------------
+  # Legal hold notice template
+  # ---------------------------------------------------------------------------
+  - trigger: ":legalhold"
+    replace: |
+      LEGAL HOLD NOTICE — {{ticket_prefix}}XXXX
+      Effective Date:
+      All data related to this incident (logs, emails, device images, tickets)
+      must be preserved and NOT deleted, overwritten, or rotated until this hold
+      is formally released by Legal. Contact {{legal_contact}} with questions.
+
+  # ---------------------------------------------------------------------------
+  # Root cause analysis template
+  # ---------------------------------------------------------------------------
+  - trigger: ":rootcause"
+    replace: |
+      Root Cause Analysis
+      --------------------
+      Initial Access Vector:
+      Vulnerability / Misconfiguration Exploited:
+      Why Existing Controls Did Not Prevent This:
+      Why Detection Was Delayed (if applicable):
+      Contributing Factors:
+
+  # ---------------------------------------------------------------------------
+  # Severity / priority matrix reference
+  # ---------------------------------------------------------------------------
+  - trigger: ":sevmatrix"
+    replace: |
+      Severity Definitions
+      ---------------------
+      P1/Critical — Active exploitation, data loss, or business-down. Immediate response.
+      P2/High     — Confirmed compromise, contained. Response within 1 hour.
+      P3/Medium   — Suspicious activity, unconfirmed. Response within 4 hours.
+      P4/Low      — Policy violation, no confirmed impact. Next business day.

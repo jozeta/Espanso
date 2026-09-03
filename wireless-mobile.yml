@@ -1,0 +1,57 @@
+# =============================================================================
+# wireless-mobile.yml — Wireless & mobile security triggers
+# Place in: ~/.config/espanso/match/
+#
+# For AUTHORIZED penetration testing / CTF use only — see the notice in
+# pentest.yml. Only test networks and devices you own or are explicitly
+# authorized to test.
+# =============================================================================
+
+matches:
+
+  # ---------------------------------------------------------------------------
+  # WIRELESS — aircrack-ng suite
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":airmoninfo"
+    replace: "airmon-ng"
+
+  - trigger: ":airmonstart"
+    replace: "airmon-ng start wlan0"
+
+  - trigger: ":airodump"
+    replace: "airodump-ng wlan0mon"
+
+  - trigger: ":aireplay"
+    replace: "aireplay-ng --deauth 10 -a TARGET_BSSID wlan0mon"
+
+  - trigger: ":aircrack"
+    replace: "aircrack-ng -w /usr/share/wordlists/rockyou.txt capture.cap"
+
+  - trigger: ":hcxdump"
+    replace: "hcxdumptool -i wlan0mon -o capture.pcapng"
+
+  - trigger: ":hcxconvert"
+    replace: "hcxpcapngtool -o hashes.hc22000 capture.pcapng"
+
+  # ---------------------------------------------------------------------------
+  # MOBILE — Android (adb) / APK analysis
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":adbdevices"
+    replace: "adb devices"
+
+  - trigger: ":adbpull"
+    replace: "adb pull /sdcard/ ./extracted/"
+
+  - trigger: ":adbshell"
+    replace: "adb shell"
+
+  - trigger: ":adbpackages"
+    replace: "adb shell pm list packages -3"
+
+  - trigger: ":apkinfo"
+    replace: "aapt dump badging app.apk"
+
+  - trigger: ":apkdecomp"
+    replace: "apktool d app.apk -o output_dir"

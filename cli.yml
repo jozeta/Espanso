@@ -1,0 +1,193 @@
+# =============================================================================
+# cli.yml — Command-line snippet triggers
+# Place in: ~/.config/espanso/match/
+# Covers: PowerShell, Azure CLI, KQL stubs, general shell utilities
+# =============================================================================
+
+matches:
+
+  # ---------------------------------------------------------------------------
+  # POWERSHELL — Entra ID / M365
+  # ---------------------------------------------------------------------------
+
+  # Connect to Microsoft Graph
+  - trigger: ":psgraph"
+    replace: "Connect-MgGraph -Scopes 'User.Read.All','AuditLog.Read.All','Directory.Read.All'"
+
+  # Get Entra ID sign-in logs for a UPN
+  - trigger: ":pssignin"
+    replace: "Get-MgAuditLogSignIn -Filter \"userPrincipalName eq 'user@domain.com'\" -Top 100 | Select-Object CreatedDateTime, AppDisplayName, IpAddress, Status, ConditionalAccessStatus"
+
+  # Revoke all refresh tokens for a user
+  - trigger: ":psrevoke"
+    replace: "Revoke-MgUserSignInSession -UserId 'user@domain.com'"
+
+  # Disable Entra ID user account
+  - trigger: ":psdisable"
+    replace: "Update-MgUser -UserId 'user@domain.com' -AccountEnabled:$false"
+
+  # List MFA methods for a user
+  - trigger: ":psmfa"
+    replace: "Get-MgUserAuthenticationMethod -UserId 'user@domain.com' | Select-Object Id, AdditionalProperties"
+
+  # Get all members of a privileged role
+  - trigger: ":psrole"
+    replace: "Get-MgDirectoryRoleMember -DirectoryRoleId '' | Select-Object Id, DisplayName, UserPrincipalName"
+
+  # ---------------------------------------------------------------------------
+  # POWERSHELL — MDE / Defender
+  # ---------------------------------------------------------------------------
+
+  # Isolate a device via MDE (Graph API)
+  - trigger: ":mdeisolate"
+    replace: "Invoke-MgSecurityActionMachineIsolate -MachineId '' -Comment 'IR containment — [INC-XXXX]'"
+
+  # Run live response script on device
+  - trigger: ":mdelive"
+    replace: "Add-MgSecurityMachineLiveResponseCommand -MachineId '' -Commands @{Type='RunScript'; Params=@{ScriptName=''}}"
+
+  # ---------------------------------------------------------------------------
+  # AZURE CLI
+  # ---------------------------------------------------------------------------
+
+  # Login to Azure
+  - trigger: ":azlogin"
+    replace: "az login --tenant <tenant-id>"
+
+  # Set active subscription
+  - trigger: ":azsub"
+    replace: "az account set --subscription '<subscription-id>'"
+
+  # List all role assignments for a resource
+  - trigger: ":azrole"
+    replace: "az role assignment list --all --include-inherited --output table"
+
+  # List diagnostic settings for a resource
+  - trigger: ":azdiag"
+    replace: "az monitor diagnostic-settings list --resource '' --output table"
+
+  # Export activity log to JSON
+  - trigger: ":azactivity"
+    replace: "az monitor activity-log list --start-time '' --end-time '' --output json > activity_log.json"
+
+  # List storage accounts and public access status
+  - trigger: ":azstorage"
+    replace: "az storage account list --query '[].{Name:name, PublicAccess:allowBlobPublicAccess, HTTPS:enableHttpsTrafficOnly}' --output table"
+
+  # ---------------------------------------------------------------------------
+  # KQL — Sentinel / Defender stubs
+  # ---------------------------------------------------------------------------
+
+  # Generic time-bounded table query stub
+  - trigger: ":kqlstart"
+    replace: |
+      // Query: [description]
+      // Timeframe: last Xh
+      TableName
+      | where TimeGenerated > ago(Xh)
+      | where 
+      | project TimeGenerated, 
+      | sort by TimeGenerated desc
+
+  # SigninLogs — failed logins stub
+  - trigger: ":kqlsignin"
+    replace: |
+      SigninLogs
+      | where TimeGenerated > ago(24h)
+      | where ResultType != "0"                          // non-success only
+      | summarize Attempts = count() by UserPrincipalName, IPAddress, ResultType, ResultDescription
+      | sort by Attempts desc
+
+  # SecurityAlert — MDE alert lookup
+  - trigger: ":kqlalert"
+    replace: |
+      SecurityAlert
+      | where TimeGenerated > ago(24h)
+      | where AlertSeverity in ("High", "Critical")
+      | project TimeGenerated, AlertName, AlertSeverity, CompromisedEntity, Entities, RemediationSteps
+      | sort by TimeGenerated desc
+
+  # DeviceProcessEvents — process execution stub
+  - trigger: ":kqlproc"
+    replace: |
+      DeviceProcessEvents
+      | where Timestamp > ago(24h)
+      | where DeviceName == ""
+      | project Timestamp, DeviceName, InitiatingProcessFileName, FileName, ProcessCommandLine, AccountName
+      | sort by Timestamp desc
+
+  # ---------------------------------------------------------------------------
+  # GENERAL SHELL UTILITIES
+  # ---------------------------------------------------------------------------
+
+  # Base64 encode a string (PowerShell)
+  - trigger: ":b64enc"
+    replace: "[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes(''))"
+
+  # Base64 decode (PowerShell)
+  - trigger: ":b64dec"
+    replace: "[Text.Encoding]::Unicode.GetString([Convert]::FromBase64String(''))"
+
+  # Hash a file — SHA256 (PowerShell)
+  - trigger: ":sha256"
+    replace: "Get-FileHash -Path '' -Algorithm SHA256 | Select-Object -ExpandProperty Hash"
+
+  # Grep for IP addresses in a log file (bash)
+  - trigger: ":grepip"
+    replace: "grep -oE '([0-9]{1,3}\\.){3}[0-9]{1,3}' "
+
+  # Tail a log file with timestamp
+  - trigger: ":logtail"
+    replace: "tail -f  | ts '[%Y-%m-%d %H:%M:%S]'"
+
+  # Netstat active connections (Windows)
+  - trigger: ":netstat"
+    replace: "netstat -ano | findstr ESTABLISHED"
+
+  # List processes sorted by CPU (Linux)
+  - trigger: ":psaux"
+    replace: "ps aux --sort=-%cpu | head -20"
+
+  # List listening sockets and owning process (Linux)
+  - trigger: ":lsof"
+    replace: "lsof -i -P -n | grep LISTEN"
+
+  # ---------------------------------------------------------------------------
+  # WINDOWS — DEFENDER / FIREWALL / HOST TRIAGE
+  # ---------------------------------------------------------------------------
+
+  # Trigger a full Defender scan
+  - trigger: ":defenderscan"
+    replace: "Start-MpScan -ScanType FullScan"
+
+  # Force Defender signature update
+  - trigger: ":defenderupdate"
+    replace: "Update-MpSignature"
+
+  # List enabled firewall rules
+  - trigger: ":fwrules"
+    replace: "Get-NetFirewallRule -Enabled True | Select-Object DisplayName, Direction, Action"
+
+  # List enabled scheduled tasks (persistence check)
+  - trigger: ":schtasks"
+    replace: "Get-ScheduledTask | Where-Object { $_.State -ne 'Disabled' } | Select-Object TaskName, TaskPath, State"
+
+  # List local administrators (privilege check)
+  - trigger: ":localadmins"
+    replace: "Get-LocalGroupMember -Group 'Administrators'"
+
+  # Pull recent Security event log entries
+  - trigger: ":winevents"
+    replace: "Get-WinEvent -LogName Security -MaxEvents 50 | Select-Object TimeCreated, Id, Message"
+
+  # Enumerate SMB shares
+  - trigger: ":sharesenum"
+    replace: "Get-SmbShare"
+
+  # List established TCP connections with owning process
+  - trigger: ":procnetconn"
+    replace: "Get-NetTCPConnection -State Established | Select-Object LocalAddress, RemoteAddress, RemotePort, OwningProcess"
+
+  # List running services (persistence / unusual service check)
+  - trigger: ":svcenum"
+    replace: "Get-Service | Where-Object { $_.Status -eq 'Running' } | Select-Object Name, DisplayName"

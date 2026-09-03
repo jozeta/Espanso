@@ -1,0 +1,58 @@
+# =============================================================================
+# shared-vars.yml — Centralized values reused across match files
+#
+# Any match file can pull these in with:
+#   imports:
+#     - "shared-vars.yml"
+#
+# Edit the values below once — every file that imports this one picks up the
+# change immediately. This file has no `matches:` of its own; it only exists
+# to be imported.
+# =============================================================================
+
+global_vars:
+
+  - name: org_name
+    type: echo
+    params:
+      echo: "[Organisation]"
+
+  - name: analyst_name
+    type: echo
+    params:
+      echo: "[Full Name]"
+
+  - name: analyst_title
+    type: echo
+    params:
+      echo: "[Job Title]"
+
+  - name: analyst_email
+    type: echo
+    params:
+      echo: "firstname.lastname@organisation.com"
+
+  - name: analyst_phone
+    type: echo
+    params:
+      echo: "+XX XXX XXX XXXX"
+
+  - name: soc_phone
+    type: echo
+    params:
+      echo: "[SOC number]"
+
+  - name: legal_contact
+    type: echo
+    params:
+      echo: "[Legal Contact]"
+
+  - name: misp_instance
+    type: echo
+    params:
+      echo: "https://<your-misp-instance>"
+
+  - name: ticket_prefix
+    type: echo
+    params:
+      echo: "INC-"

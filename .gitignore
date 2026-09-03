@@ -1,0 +1,16 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Espanso local/runtime artifacts (if this repo is ever used as a live match dir)
+*.log
+
+# Anything containing real, non-placeholder secrets or credentials
+*.secret.yml
+.env

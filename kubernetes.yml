@@ -1,0 +1,68 @@
+# =============================================================================
+# kubernetes.yml — Container & Kubernetes security triggers
+# Place in: ~/.config/espanso/match/
+# Covers: kubectl auditing, image scanning, Dockerfile hardening
+# =============================================================================
+
+matches:
+
+  # ---------------------------------------------------------------------------
+  # KUBERNETES — kubectl
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":kubectlpods"
+    replace: "kubectl get pods --all-namespaces -o wide"
+
+  - trigger: ":kubectlpriv"
+    replace: "kubectl get pods --all-namespaces -o json | jq -r '.items[] | select(.spec.containers[].securityContext.privileged==true) | .metadata.name'"
+
+  - trigger: ":kubectlrbac"
+    replace: "kubectl get clusterrolebindings -o wide"
+
+  - trigger: ":kubectlsecrets"
+    replace: "kubectl get secrets --all-namespaces"
+
+  - trigger: ":kubectlexec"
+    replace: "kubectl exec -it POD_NAME -n NAMESPACE -- /bin/sh"
+
+  - trigger: ":kubectllogs"
+    replace: "kubectl logs POD_NAME -n NAMESPACE --previous"
+
+  - trigger: ":kubectlevents"
+    replace: "kubectl get events --all-namespaces --sort-by='.lastTimestamp'"
+
+  # ---------------------------------------------------------------------------
+  # CONTAINERS — image scanning / inspection
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":trivyscan"
+    replace: "trivy image IMAGE_NAME:TAG"
+
+  - trigger: ":grypescan"
+    replace: "grype IMAGE_NAME:TAG"
+
+  - trigger: ":dockerhistory"
+    replace: "docker history --no-trunc IMAGE_NAME"
+
+  - trigger: ":dockerinspect"
+    replace: "docker inspect CONTAINER_ID"
+
+  - trigger: ":dockerps"
+    replace: "docker ps -a --no-trunc"
+
+  # ---------------------------------------------------------------------------
+  # HARDENING REFERENCE
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":dockerhardening"
+    replace: |
+      Dockerfile Hardening Checklist
+      ---------------------------------
+      [ ] Base image pinned to a specific digest/tag (not `latest`)
+      [ ] Runs as a non-root USER
+      [ ] No secrets or credentials baked into layers
+      [ ] Multi-stage build used to exclude build tooling from final image
+      [ ] Minimal base image (distroless / alpine) where possible
+      [ ] HEALTHCHECK defined
+      [ ] Unnecessary packages / package managers removed
+      [ ] Image scanned (trivy/grype) with no Critical/High unresolved

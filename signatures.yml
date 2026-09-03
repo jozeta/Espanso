@@ -1,0 +1,56 @@
+# =============================================================================
+# signatures.yml — Email signature triggers
+# Place in: ~/.config/espanso/match/
+# Values below are pulled from shared-vars.yml — edit that file once instead
+# of hunting through each signature. Any field not covered there (team name,
+# PGP key, backup contact) is still a plain [placeholder] to fill in per use.
+# =============================================================================
+
+imports:
+  - "shared-vars.yml"
+
+matches:
+
+  # ---------------------------------------------------------------------------
+  # Standard professional signature
+  # ---------------------------------------------------------------------------
+  - trigger: ":sig"
+    replace: |
+      ──────────────────────────────
+      {{analyst_name}}
+      {{analyst_title}} | [Team / Department]
+      {{org_name}}
+      M: {{analyst_phone}}
+      E: {{analyst_email}}
+      ──────────────────────────────
+
+  # ---------------------------------------------------------------------------
+  # Short / inline signature — for replies and internal messages
+  # ---------------------------------------------------------------------------
+  - trigger: ":sigs"
+    replace: "{{analyst_name}} | {{analyst_title}} | {{org_name}}"
+
+  # ---------------------------------------------------------------------------
+  # Incident response contact signature — used during active incidents
+  # ---------------------------------------------------------------------------
+  - trigger: ":sigir"
+    replace: |
+      ──────────────────────────────
+      {{analyst_name}}
+      Incident Response | Security Operations
+      {{org_name}}
+      Incident Hotline: {{soc_phone}}
+      Secure Email: {{analyst_email}}
+      PGP: [Key ID or fingerprint]
+      ──────────────────────────────
+      CONFIDENTIALITY NOTICE: This communication may contain sensitive security information.
+      Do not forward without authorisation.
+
+  # ---------------------------------------------------------------------------
+  # Out-of-office / escalation footer — append to OOO replies
+  # ---------------------------------------------------------------------------
+  - trigger: ":sigooo"
+    replace: |
+      I am currently out of office. For urgent security matters, please contact:
+      [Backup Contact Name] — [backup@organisation.com] — [phone]
+      For active incidents, call the SOC directly: {{soc_phone}}

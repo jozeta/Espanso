@@ -1,0 +1,49 @@
+# =============================================================================
+# compliance.yml — Compliance / audit triggers
+# Place in: ~/.config/espanso/match/
+# =============================================================================
+
+matches:
+
+  - trigger: ":gdprclock"
+    replace: "GDPR: Notify the supervisory authority within 72 hours of becoming aware of a personal data breach (Art. 33)."
+
+  - trigger: ":pcidss"
+    replace: "PCI-DSS: Report suspected cardholder data compromise immediately to the acquiring bank and relevant card brands."
+
+  - trigger: ":soc2ref"
+    replace: |
+      SOC 2 Trust Service Criteria
+      --------------------------------
+      Security | Availability | Processing Integrity | Confidentiality | Privacy
+
+  - trigger: ":isocontrol"
+    replace: |
+      ISO 27001 Control Mapping
+      -----------------------------
+      Control ID:
+      Control Name:
+      Implementation Status:  [Implemented / Partial / Not Implemented]
+      Evidence Location:
+      Owner:
+
+  - trigger: ":auditfinding"
+    replace: |
+      Audit Finding
+      ---------------
+      Finding:
+      Control Reference:
+      Risk Rating:          [Critical / High / Medium / Low]
+      Management Response:
+      Remediation Owner:
+      Due Date:
+
+  - trigger: ":dpia"
+    replace: |
+      Data Protection Impact Assessment (DPIA) — Stub
+      ----------------------------------------------------
+      Processing Description:
+      Necessity & Proportionality:
+      Risks to Individuals:
+      Mitigations:
+      DPO Consulted:        [Y/N]

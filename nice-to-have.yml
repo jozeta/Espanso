@@ -1,0 +1,121 @@
+# =============================================================================
+# nice-to-have.yml — General productivity triggers
+# Place in: ~/.config/espanso/match/
+# Covers: quick replies, symbols, formatting, email boilerplate, small utils
+# =============================================================================
+
+matches:
+
+  # ---------------------------------------------------------------------------
+  # QUICK REPLIES
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":ty"
+    replace: "Thank you!"
+
+  - trigger: ":lmk"
+    replace: "Let me know if you have any questions."
+
+  - trigger: ":brb"
+    replace: "Be right back — stepping away for a few minutes."
+
+  - trigger: ":flw"
+    replace: "Following up on this — "
+
+  - trigger: ":apw"
+    replace: "Apologies for the delay — "
+
+  - trigger: ":eta"
+    replace: "I'll have an update by [TIME]."
+
+  - trigger: ":greet"
+    replace: "Hi [Name],\n\n"
+
+  - trigger: ":close"
+    replace: "Best regards,\n"
+
+  # ---------------------------------------------------------------------------
+  # TEMPLATES
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":recap"
+    replace: |
+      Meeting Recap — DD Mon YYYY
+      Attendees:
+      Key Points:
+        -
+      Decisions:
+        -
+      Action Items:        [Owner / Due Date]
+        -
+
+  - trigger: ":cal"
+    replace: |
+      Proposed times: [Option 1] / [Option 2] / [Option 3]
+      Duration:
+      Location / Link:
+      Agenda:
+
+  - trigger: ":addr"
+    replace: |
+      [Street Address]
+      [City, State/Region  Postal Code]
+      [Country]
+
+  - trigger: ":phone"
+    replace: "+XX XXX XXX XXXX"
+
+  # ---------------------------------------------------------------------------
+  # SYMBOLS & FORMATTING
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":arrow"
+    replace: "→"
+
+  - trigger: ":check"
+    replace: "✅"
+
+  - trigger: ":cross"
+    replace: "❌"
+
+  - trigger: ":warn"
+    replace: "⚠️"
+
+  - trigger: ":bullet"
+    replace: "• "
+
+  - trigger: ":em"
+    replace: "—"
+
+  - trigger: ":todo"
+    replace: "TODO: "
+
+  # ---------------------------------------------------------------------------
+  # SMALL UTILITIES (shell-backed)
+  # ---------------------------------------------------------------------------
+
+  # Generate a random 20-character strong password
+  - trigger: ":genpw"
+    replace: "{{pw}}"
+    vars:
+      - name: pw
+        type: shell
+        params:
+          cmd: "powershell -NoProfile -Command \"-join ((33..126) | Get-Random -Count 20 | ForEach-Object {[char]$_})\""
+
+  # Generate a new GUID/UUID
+  - trigger: ":uuid"
+    replace: "{{id}}"
+    vars:
+      - name: id
+        type: shell
+        params:
+          cmd: "powershell -NoProfile -Command \"[guid]::NewGuid().ToString()\""
+
+  - trigger: ":d"
+    replace: "{{d}}"
+    vars:
+      - name: d
+        type: date
+        params:
+          format: "%d %b %Y"

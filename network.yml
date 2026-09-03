@@ -1,0 +1,87 @@
+# =============================================================================
+# network.yml — Network / traffic analysis triggers
+# Place in: ~/.config/espanso/match/
+# Covers: Wireshark/tshark filters, tcpdump, DNS lookups, port reference
+# =============================================================================
+
+matches:
+
+  # ---------------------------------------------------------------------------
+  # WIRESHARK / TSHARK
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":wsdns"
+    replace: "dns"
+
+  - trigger: ":wshttp"
+    replace: "http.request or tls.handshake.type == 1"
+
+  - trigger: ":wsbeacon"
+    replace: "ip.addr == TARGET_IP && tcp.flags.syn == 1"
+
+  - trigger: ":wscreds"
+    replace: "http.request.method == \"POST\" or ftp.request.command == \"PASS\""
+
+  - trigger: ":tsharkhttp"
+    replace: "tshark -i eth0 -Y http -T fields -e ip.src -e ip.dst -e http.request.full_uri"
+
+  - trigger: ":tcpdumpcap"
+    replace: "tcpdump -i eth0 -w capture.pcap"
+
+  - trigger: ":tcpdumpfilter"
+    replace: "tcpdump -i eth0 host TARGET_IP and port 443"
+
+  # ---------------------------------------------------------------------------
+  # DNS / DIAGNOSTICS
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":diglookup"
+    replace: "dig +short TARGET_DOMAIN"
+
+  - trigger: ":digmx"
+    replace: "dig MX TARGET_DOMAIN"
+
+  - trigger: ":digns"
+    replace: "dig NS TARGET_DOMAIN"
+
+  - trigger: ":nslookupptr"
+    replace: "nslookup -type=PTR TARGET_IP"
+
+  - trigger: ":traceroute"
+    replace: "traceroute TARGET_IP"
+
+  - trigger: ":tracert"
+    replace: "tracert TARGET_IP"
+
+  - trigger: ":curlheaders"
+    replace: "curl -I -s https://TARGET"
+
+  - trigger: ":curlfollow"
+    replace: "curl -IL -s https://TARGET"
+
+  # ---------------------------------------------------------------------------
+  # REFERENCE
+  # ---------------------------------------------------------------------------
+
+  - trigger: ":portref"
+    replace: |
+      Common Ports Reference
+      ------------------------
+      21    FTP
+      22    SSH
+      23    Telnet
+      25    SMTP
+      53    DNS
+      80    HTTP
+      110   POP3
+      135   RPC
+      139   NetBIOS
+      143   IMAP
+      389   LDAP
+      443   HTTPS
+      445   SMB
+      3306  MySQL
+      3389  RDP
+      5432  PostgreSQL
+      5985  WinRM (HTTP)
+      8080  HTTP-alt
