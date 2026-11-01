@@ -14,3 +14,14 @@ desktop.ini
 # Anything containing real, non-placeholder secrets or credentials
 *.secret.yml
 .env
+
+# --- Baseline: macOS, Claude Code and secrets ---
+._*
+.claude/settings.local.json
+.remember/
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
