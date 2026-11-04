@@ -37,3 +37,8 @@ start with `imports: ["shared-vars.yml"]` and reference `{{org_name}}` etc.
 Validate YAML before committing, for example
 `python3 -c "import yaml,glob;[yaml.safe_load(open(f)) for f in glob.glob('*.yml')]"`, then with
 Espanso installed run `espanso restart` and `espanso log` to catch load errors.
+
+## App standards
+
+This repo follows the app standards in `~/Desktop/code/tools/standards/STANDARDS.md` (rule IDs,
+severities; decisions and waivers in `.claude-standards`). `claude-check --repo .` checks it.
