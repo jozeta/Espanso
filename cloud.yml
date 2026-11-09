@@ -1,6 +1,6 @@
 # =============================================================================
 # cloud.yml — Multi-cloud security command triggers (AWS, GCP)
-# Place in: ~/.config/espanso/match/
+# Place in: your Espanso match directory (`espanso path` shows the config folder)
 # Note: Azure CLI / Entra ID triggers live in cli.yml.
 # =============================================================================
 

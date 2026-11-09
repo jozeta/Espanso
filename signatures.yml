@@ -1,6 +1,6 @@
 # =============================================================================
 # signatures.yml — Email signature triggers
-# Place in: ~/.config/espanso/match/
+# Place in: your Espanso match directory (`espanso path` shows the config folder)
 # Values below are pulled from shared-vars.yml — edit that file once instead
 # of hunting through each signature. Any field not covered there (team name,
 # PGP key, backup contact) is still a plain [placeholder] to fill in per use.
@@ -15,6 +15,7 @@ matches:
   # Standard professional signature
   # ---------------------------------------------------------------------------
   - trigger: ":sig"
+    word: true  # also a prefix of longer triggers; wait for a separator
     replace: |
       ──────────────────────────────
       {{analyst_name}}

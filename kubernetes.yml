@@ -1,6 +1,6 @@
 # =============================================================================
 # kubernetes.yml — Container & Kubernetes security triggers
-# Place in: ~/.config/espanso/match/
+# Place in: your Espanso match directory (`espanso path` shows the config folder)
 # Covers: kubectl auditing, image scanning, Dockerfile hardening
 # =============================================================================
 

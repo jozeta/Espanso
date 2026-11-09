@@ -1,6 +1,6 @@
 # =============================================================================
 # timestamps.yml — Date & time expansion triggers
-# Place in: ~/.config/espanso/match/
+# Place in: your Espanso match directory (`espanso path` shows the config folder)
 # =============================================================================
 
 matches:
@@ -9,6 +9,7 @@ matches:
   # Current date — "28 Mar 2026"
   # ---------------------------------------------------------------------------
   - trigger: ":date"
+    word: true  # also a prefix of longer triggers; wait for a separator
     replace: "{{day}} {{month}} {{year}}"
     vars:
       - name: day
@@ -39,6 +40,7 @@ matches:
   # ISO 8601 UTC — "2026-03-28T14:00:00Z"
   # ---------------------------------------------------------------------------
   - trigger: ":iso"
+    word: true  # also a prefix of longer triggers; wait for a separator
     replace: "{{ts}}Z"
     vars:
       - name: ts
@@ -78,6 +80,7 @@ matches:
   # Current local time — "14:00"
   # ---------------------------------------------------------------------------
   - trigger: ":time"
+    word: true  # also a prefix of longer triggers; wait for a separator
     replace: "{{t}}"
     vars:
       - name: t

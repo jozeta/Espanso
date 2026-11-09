@@ -1,6 +1,6 @@
 # =============================================================================
 # nice-to-have.yml — General productivity triggers
-# Place in: ~/.config/espanso/match/
+# Place in: your Espanso match directory (`espanso path` shows the config folder)
 # Covers: quick replies, symbols, formatting, email boilerplate, small utils
 # =============================================================================
 
@@ -101,7 +101,10 @@ matches:
       - name: pw
         type: shell
         params:
-          cmd: "powershell -NoProfile -Command \"-join ((33..126) | Get-Random -Count 20 | ForEach-Object {[char]$_})\""
+          # macOS / Linux (printable ASCII from /dev/urandom):
+          cmd: "LC_ALL=C tr -dc '!-~' < /dev/urandom | head -c 20"
+          # Windows:
+          # cmd: "powershell -NoProfile -Command \"-join ((33..126) | Get-Random -Count 20 | ForEach-Object {[char]$_})\""
 
   # Generate a new GUID/UUID
   - trigger: ":uuid"
@@ -110,9 +113,15 @@ matches:
       - name: id
         type: shell
         params:
-          cmd: "powershell -NoProfile -Command \"[guid]::NewGuid().ToString()\""
+          # macOS / Linux:
+          cmd: "uuidgen | tr '[:upper:]' '[:lower:]'"
+          # Linux without uuidgen:
+          # cmd: "cat /proc/sys/kernel/random/uuid"
+          # Windows:
+          # cmd: "powershell -NoProfile -Command \"[guid]::NewGuid().ToString()\""
 
   - trigger: ":d"
+    word: true  # also a prefix of longer triggers; wait for a separator
     replace: "{{d}}"
     vars:
       - name: d

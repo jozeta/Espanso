@@ -1,6 +1,6 @@
 # =============================================================================
 # ctf.yml — CTF-specific triggers
-# Place in: ~/.config/espanso/match/
+# Place in: your Espanso match directory (`espanso path` shows the config folder)
 # =============================================================================
 
 matches:

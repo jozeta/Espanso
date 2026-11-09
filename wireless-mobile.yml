@@ -1,6 +1,6 @@
 # =============================================================================
 # wireless-mobile.yml — Wireless & mobile security triggers
-# Place in: ~/.config/espanso/match/
+# Place in: your Espanso match directory (`espanso path` shows the config folder)
 #
 # For AUTHORIZED penetration testing / CTF use only — see the notice in
 # pentest.yml. Only test networks and devices you own or are explicitly

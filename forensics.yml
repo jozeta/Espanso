@@ -1,6 +1,6 @@
 # =============================================================================
 # forensics.yml — Digital forensics & incident response (DFIR) triggers
-# Place in: ~/.config/espanso/match/
+# Place in: your Espanso match directory (`espanso path` shows the config folder)
 # Covers: evidence handling, memory forensics, disk/timeline, log parsing,
 #         Windows artifacts, YARA / Sigma rule stubs
 # =============================================================================

@@ -1,6 +1,6 @@
 # =============================================================================
 # network.yml — Network / traffic analysis triggers
-# Place in: ~/.config/espanso/match/
+# Place in: your Espanso match directory (`espanso path` shows the config folder)
 # Covers: Wireshark/tshark filters, tcpdump, DNS lookups, port reference
 # =============================================================================
 

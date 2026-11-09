@@ -10,8 +10,11 @@ Copy all `.yml` files into your Espanso match directory:
 | OS      | Path                                          |
 |---------|-----------------------------------------------|
 | Windows | `%APPDATA%\espanso\match\`                    |
-| macOS   | `~/.config/espanso/match\`                    |
-| Linux   | `~/.config/espanso/match\`                    |
+| macOS   | `~/Library/Application Support/espanso/match/` |
+| Linux   | `~/.config/espanso/match/`                    |
+
+Not sure which folder your install uses? `espanso path` prints the config
+folder; the match files go in its `match/` subfolder.
 
 Then reload Espanso:
 ```
@@ -411,7 +414,8 @@ own or are not explicitly authorized to test.
 
 - **`shared-vars.yml`**: set `org_name`, `analyst_name`, `analyst_title`, `analyst_email`, `analyst_phone`, `soc_phone`, `legal_contact`, `misp_instance`, and `ticket_prefix` once — `signatures.yml`, `ioc.yml`, and `incidents.yml` all pick the values up automatically via `imports:`.
 - **`:defip` / `:defurl` / `:defemail`** use shell clipboard commands. Switch between `pbpaste` (macOS) and `xclip` (Linux) by commenting/uncommenting the appropriate `cmd` line in `ioc.yml` / `encoding.yml`.
-- **`:genpw` / `:uuid`** shell out to PowerShell — adjust the `cmd` in `nice-to-have.yml` if you're on macOS/Linux.
+- **`:genpw` / `:uuid`** use shell commands that work on macOS and Linux (`/dev/urandom`, `uuidgen`). On Windows, switch to the commented PowerShell `cmd` lines in `nice-to-have.yml`.
+- **Short triggers that start longer ones** (`:d`, `:date`, `:iso`, `:time`, `:timeline`, `:sig`, `:sev`) are word triggers: type a space, Enter or punctuation after them to expand. Without this, Espanso would expand `:d` before you could finish typing `:date` or `:defip`.
 - **Signatures**: Any field not covered by `shared-vars.yml` (team name, PGP key, backup contact) is still a plain `[placeholder]` to fill in per use.
 - **`pentest.yml` / `wireless-mobile.yml`**: replace `TARGET` / `ATTACKER_IP` / `TARGET_BSSID` / wordlist paths before running, and only against systems and networks you are authorized to test — see [Authorized Use Only](#-authorized-use-only) above.
 - All triggers use `:` prefix to avoid accidental expansion mid-word.

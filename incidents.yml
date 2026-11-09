@@ -1,6 +1,6 @@
 # =============================================================================
 # incidents.yml — Incident response and ticket phrase triggers
-# Place in: ~/.config/espanso/match/
+# Place in: your Espanso match directory (`espanso path` shows the config folder)
 # =============================================================================
 
 imports:
@@ -32,6 +32,7 @@ matches:
   # Full timeline table header + first row
   # ---------------------------------------------------------------------------
   - trigger: ":timeline"
+    word: true  # also a prefix of longer triggers; wait for a separator
     replace: |
       | Timestamp (UTC)          | Actor / System | Event / Observation |
       |--------------------------|----------------|---------------------|
@@ -87,6 +88,7 @@ matches:
   # Severity rating line — drop into any finding or ticket
   # ---------------------------------------------------------------------------
   - trigger: ":sev"
+    word: true  # also a prefix of longer triggers; wait for a separator
     replace: "Severity: [Critical / High / Medium / Low] | CVSSv3: X.X | Risk: [Immediate Action / Scheduled Remediation / Accept]"
 
   # ---------------------------------------------------------------------------

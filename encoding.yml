@@ -1,6 +1,6 @@
 # =============================================================================
 # encoding.yml — Encoding / decoding utility triggers
-# Place in: ~/.config/espanso/match/
+# Place in: your Espanso match directory (`espanso path` shows the config folder)
 # Covers: URL, hex, base32, JWT, HTML entity encode/decode, email defang
 # (Base64 encode/decode lives in cli.yml as :b64enc / :b64dec)
 # =============================================================================

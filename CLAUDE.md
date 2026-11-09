@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A collection of [Espanso](https://espanso.org/) text-expander match files for blue team
 (SOC/IR/DFIR), red team/pentest and everyday productivity. There's no code: every file is
 Espanso YAML, installed by copying all `.yml` files into the Espanso match directory
-(`~/.config/espanso/match/` on macOS/Linux, `%APPDATA%\espanso\match\` on Windows).
+(`~/Library/Application Support/espanso/match/` on macOS, `~/.config/espanso/match/` on Linux,
+`%APPDATA%\espanso\match\` on Windows; `espanso path` shows the config folder).
 
 ## Layout
 
@@ -24,19 +25,24 @@ start with `imports: ["shared-vars.yml"]` and reference `{{org_name}}` etc.
 
 - **Every trigger starts with `:`** so it can't expand mid-word. Triggers must be unique across
   all files: Espanso loads them together, so grep all files before adding one.
+- **No trigger may be a prefix of another** unless the shorter one has `word: true`; Espanso
+  expands as soon as a trigger matches, so `:d` would otherwise fire before `:date` is typed.
 - Keep the generic `[Placeholder]` values in `shared-vars.yml`. Never commit real names,
   emails, phone numbers or internal URLs.
 - Shell-backed matches (`:defip`, `:defurl`, `:defemail`, `:genpw`, `:uuid`) have per-OS `cmd`
-  lines (pbpaste/xclip/PowerShell); keep the alternatives as comments.
+  lines (pbpaste/xclip/PowerShell). The active line is the macOS one; keep the alternatives as
+  comments.
 - `pentest.yml` and `wireless-mobile.yml` are for authorized testing only; keep `TARGET` /
   `ATTACKER_IP` placeholders and never embed real targets.
 - When adding or renaming a trigger, update the README Quick Reference table.
 
 ## Checking changes
 
-Validate YAML before committing, for example
-`python3 -c "import yaml,glob;[yaml.safe_load(open(f)) for f in glob.glob('*.yml')]"`, then with
-Espanso installed run `espanso restart` and `espanso log` to catch load errors.
+Validate YAML before committing. PyYAML isn't installed on this machine; the system Ruby works:
+`ruby -ryaml -e 'Dir["*.yml"].each{|f| YAML.safe_load(File.read(f))}; puts "ok"'`
+(or `python3 -c "import yaml,glob;[yaml.safe_load(open(f)) for f in glob.glob('*.yml')]"` where
+PyYAML is available). Then with Espanso installed run `espanso restart` and `espanso log` to catch
+load errors.
 
 ## App standards
 
