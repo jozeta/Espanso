@@ -1,0 +1,101 @@
+# =============================================================================
+# swedish.yml — Swedish versions of the signature and communication templates
+# Place in: your Espanso match directory (`espanso path` shows the config folder)
+# Mirrors :sig, :sigir, :sigooo (signatures.yml), :commstemplate, :sitrep
+# (incidents.yml) and :phishreply (email.yml). Keep the two languages in sync
+# when either side changes. All triggers start with :sv so they can't collide.
+# =============================================================================
+
+imports:
+  - "shared-vars.yml"
+
+matches:
+
+  # ---------------------------------------------------------------------------
+  # Signatur — standard (:sig)
+  # ---------------------------------------------------------------------------
+  - trigger: ":svsig"
+    replace: |
+      ──────────────────────────────
+      {{analyst_name}}
+      {{analyst_title}} | [Avdelning / Team]
+      {{org_name}}
+      Mobil: {{analyst_phone}}
+      E-post: {{analyst_email}}
+      ──────────────────────────────
+
+  # ---------------------------------------------------------------------------
+  # Signatur — incidenthantering (:sigir)
+  # ---------------------------------------------------------------------------
+  - trigger: ":svirsig"
+    replace: |
+      ──────────────────────────────
+      {{analyst_name}}
+      Incidenthantering | Säkerhetsfunktionen (SOC)
+      {{org_name}}
+      Incidentjour: {{soc_phone}}
+      Säker e-post: {{analyst_email}}
+      PGP: [Nyckel-ID eller fingeravtryck]
+      ──────────────────────────────
+      SEKRETESS: Detta meddelande kan innehålla känslig säkerhetsinformation.
+      Vidarebefordra inte utan tillstånd.
+
+  # ---------------------------------------------------------------------------
+  # Frånvaromeddelande (:sigooo)
+  # ---------------------------------------------------------------------------
+  - trigger: ":svooo"
+    replace: |
+      Jag är inte på kontoret just nu. Vid brådskande säkerhetsärenden, kontakta:
+      [Namn på ersättare] — [backup@organisation.com] — [telefon]
+
+  # ---------------------------------------------------------------------------
+  # Incidentmeddelande till ledning / personal / berörda (:commstemplate)
+  # ---------------------------------------------------------------------------
+  - trigger: ":svincident"
+    replace: |
+      Ämne: [Säkerhetsincident — {{ticket_prefix}}XXXX]
+
+      Mottagare: [Ledning / All personal / Berörda användare]
+      Klassning: [Intern / Konfidentiell]
+
+      Sammanfattning:
+      Vad har hänt:
+      Påverkan just nu:
+      Vidtagna åtgärder:
+      Vad du behöver göra:
+      Nästa uppdatering senast:
+
+      Kontakt: {{analyst_name}}, incidentjour {{soc_phone}}
+
+  # ---------------------------------------------------------------------------
+  # Lägesrapport under pågående incident (:sitrep)
+  # ---------------------------------------------------------------------------
+  - trigger: ":svlage"
+    replace: |
+      Lägesrapport — {{ticket_prefix}}XXXX — [DD mån ÅÅÅÅ HH:MM UTC]
+      ------------------------------------------------------
+      Status:                 [Pågående / Under kontroll / Avslutad]
+      Allvarlighetsgrad:      [Kritisk / Hög / Medel / Låg]
+      Sedan förra rapporten:
+      Nuvarande påverkan:
+      Nästa steg:
+      Behov av beslut / stöd:
+      Nästa rapport:
+
+  # ---------------------------------------------------------------------------
+  # Svar till den som rapporterat ett misstänkt mejl (:phishreply)
+  # ---------------------------------------------------------------------------
+  - trigger: ":svphish"
+    replace: |
+      Hej,
+
+      Tack för att du rapporterade det misstänkta mejlet. Vi har analyserat det och bedömer det som: [Skadligt / Misstänkt / Skräppost / Ofarligt / Phishing-övning].
+
+      [Om skadligt:] Vi har tagit bort meddelandet från berörda inkorgar och blockerat avsändaren. Om du har klickat på en länk, öppnat en bilaga eller angett ditt lösenord, kontakta oss direkt på {{soc_phone}}.
+
+      [Om ofarligt:] Meddelandet är legitimt och du kan hantera det som vanligt.
+
+      Fortsätt gärna att rapportera mejl som verkar misstänkta, det hjälper oss att skydda {{org_name}}.
+
+      Vänliga hälsningar,
+      {{analyst_name}}

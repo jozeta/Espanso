@@ -1,7 +1,7 @@
 # =============================================================================
 # cli.yml — Command-line snippet triggers
 # Place in: your Espanso match directory (`espanso path` shows the config folder)
-# Covers: PowerShell, Azure CLI, KQL stubs, general shell utilities
+# Covers: PowerShell, Azure CLI, KQL stubs, general shell utilities, Windows and macOS host triage
 # =============================================================================
 
 matches:
@@ -200,3 +200,51 @@ matches:
   # List running services (persistence / unusual service check)
   - trigger: ":svcenum"
     replace: "Get-Service | Where-Object { $_.Status -eq 'Running' } | Select-Object Name, DisplayName"
+
+  # ---------------------------------------------------------------------------
+  # macOS — HOST TRIAGE
+  # ---------------------------------------------------------------------------
+
+  # Search the unified log (full path: in zsh, `log` is a shell builtin)
+  - trigger: ":maclogshow"
+    replace: "/usr/bin/log show --last 1h --style syslog --predicate 'eventMessage CONTAINS[c] \"<text>\"'"
+
+  # Collect the unified log as evidence (.logarchive, open with `log show <file>`)
+  - trigger: ":maclogcollect"
+    replace: "sudo /usr/bin/log collect --last 1d --output ~/Desktop/"
+
+  # Launch agents / daemons outside Apple's own (persistence check)
+  - trigger: ":macpersist"
+    replace: "ls -la /Library/LaunchAgents /Library/LaunchDaemons ~/Library/LaunchAgents 2>/dev/null; launchctl list | grep -v 'com\\.apple\\.'"
+
+  # Background Task Management: login items and launch items as macOS 13+ records them
+  - trigger: ":macbtm"
+    replace: "sudo sfltool dumpbtm"
+
+  # Installed configuration profiles (MDM, or a persistence / proxy vector)
+  - trigger: ":macprofiles"
+    replace: "sudo profiles show -all"
+
+  # Download history from the quarantine events database
+  - trigger: ":macquarantine"
+    replace: "sqlite3 ~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2 'SELECT datetime(LSQuarantineTimeStamp + 978307200, \"unixepoch\"), LSQuarantineAgentName, LSQuarantineDataURLString, LSQuarantineOriginURLString FROM LSQuarantineEvent ORDER BY LSQuarantineTimeStamp DESC LIMIT 50'"
+
+  # Privacy (TCC) grants per app; the terminal needs Full Disk Access
+  - trigger: ":mactcc"
+    replace: "sqlite3 ~/Library/Application\\ Support/com.apple.TCC/TCC.db 'SELECT client, service, auth_value FROM access ORDER BY client'"
+
+  # Code signature, notarisation and quarantine flag of an app or binary
+  - trigger: ":macsign"
+    replace: "codesign -dv --verbose=4 '<path>' 2>&1; spctl -a -vv '<path>'; xattr -l '<path>'"
+
+  # Security posture: SIP, Gatekeeper, FileVault
+  - trigger: ":macsecstatus"
+    replace: "csrutil status; spctl --status; fdesetup status"
+
+  # Established network connections with owning process
+  - trigger: ":macnet"
+    replace: "lsof -nP -iTCP -sTCP:ESTABLISHED"
+
+  # Local user accounts (hides _system accounts)
+  - trigger: ":macusers"
+    replace: "dscl . list /Users UniqueID | grep -v '^_'"

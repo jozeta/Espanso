@@ -1,0 +1,161 @@
+# =============================================================================
+# detection.yml — Hunting queries: KQL (Sentinel / Defender XDR) and Splunk SPL
+# Place in: your Espanso match directory (`espanso path` shows the config folder)
+# Basic KQL stubs (:kqlstart, :kqlsignin, :kqlalert, :kqlproc) live in cli.yml.
+# Table and column names are the standard Sentinel / Defender XDR schemas; SPL
+# index, sourcetype and field names depend on your add-ons (CIM), so adjust them.
+# =============================================================================
+
+matches:
+
+  # ---------------------------------------------------------------------------
+  # KQL — IDENTITY (Sentinel: SigninLogs / AuditLogs)
+  # ---------------------------------------------------------------------------
+
+  # MFA fatigue: many denied / failed MFA prompts for one user in a short window
+  - trigger: ":kqlmfafatigue"
+    replace: |
+      // MFA fatigue / push bombing: repeated MFA failures per user per hour
+      SigninLogs
+      | where TimeGenerated > ago(24h)
+      | where ResultType == "500121"   // MFA denied or not completed
+      | summarize Prompts = count(), IPs = make_set(IPAddress), Apps = make_set(AppDisplayName)
+          by UserPrincipalName, bin(TimeGenerated, 1h)
+      | where Prompts >= 5
+      | sort by Prompts desc
+
+  # Successful sign-ins from a country the user hasn't signed in from in 14 days
+  - trigger: ":kqlnewcountry"
+    replace: |
+      let known = SigninLogs
+          | where TimeGenerated between (ago(14d) .. ago(1d)) and ResultType == "0"
+          | summarize KnownCountries = make_set(tostring(LocationDetails.countryOrRegion))
+              by UserPrincipalName;
+      SigninLogs
+      | where TimeGenerated > ago(1d) and ResultType == "0"
+      | extend Country = tostring(LocationDetails.countryOrRegion)
+      | join kind=inner known on UserPrincipalName
+      | where isnotempty(Country) and not(set_has_element(KnownCountries, Country))
+      | project TimeGenerated, UserPrincipalName, Country, IPAddress, AppDisplayName, UserAgent
+
+  # OAuth consent grants (illicit consent / consent phishing)
+  - trigger: ":kqlconsent"
+    replace: |
+      AuditLogs
+      | where TimeGenerated > ago(7d)
+      | where OperationName == "Consent to application"
+      | extend User = tostring(InitiatedBy.user.userPrincipalName),
+               App = tostring(TargetResources[0].displayName),
+               AppId = tostring(TargetResources[0].id)
+      | project TimeGenerated, User, App, AppId, Result, TargetResources
+      | sort by TimeGenerated desc
+
+  # ---------------------------------------------------------------------------
+  # KQL — EMAIL (OfficeActivity / Defender for Office 365)
+  # ---------------------------------------------------------------------------
+
+  # New or changed inbox rules (forwarding / deletion rules after account takeover)
+  - trigger: ":kqlinboxrule"
+    replace: |
+      OfficeActivity
+      | where TimeGenerated > ago(7d)
+      | where Operation in ("New-InboxRule", "Set-InboxRule", "UpdateInboxRules")
+      // look for ForwardTo / RedirectTo / DeleteMessage / MoveToFolder in Parameters;
+      // rules made in Outlook (UpdateInboxRules) carry their details elsewhere, so review all
+      | project TimeGenerated, UserId, Operation, ClientIP, Parameters
+      | sort by TimeGenerated desc
+
+  # All mail from one sender: scope a phishing campaign before purging
+  - trigger: ":kqlmailfrom"
+    replace: |
+      EmailEvents
+      | where Timestamp > ago(7d)
+      | where SenderFromAddress =~ "sender@example.com"
+      | project Timestamp, RecipientEmailAddress, Subject, DeliveryAction, DeliveryLocation,
+                ThreatTypes, NetworkMessageId
+      | sort by Timestamp desc
+
+  # Who clicked a URL (Safe Links click data)
+  - trigger: ":kqlurlclick"
+    replace: |
+      UrlClickEvents
+      | where Timestamp > ago(7d)
+      | where Url has "example.com"
+      | project Timestamp, AccountUpn, Url, ActionType, IsClickedThrough, IPAddress, Workload
+      | sort by Timestamp desc
+
+  # ---------------------------------------------------------------------------
+  # KQL — ENDPOINT (Defender XDR advanced hunting)
+  # ---------------------------------------------------------------------------
+
+  # Encoded PowerShell command lines
+  - trigger: ":kqlencps"
+    replace: |
+      DeviceProcessEvents
+      | where Timestamp > ago(7d)
+      | where FileName in~ ("powershell.exe", "pwsh.exe")
+      | where ProcessCommandLine matches regex @"(?i)\s[-/]e(c|n[a-z]*)?\s"
+      | project Timestamp, DeviceName, AccountName, InitiatingProcessFileName, ProcessCommandLine
+      | sort by Timestamp desc
+
+  # Every device that talked to an IP
+  - trigger: ":kqlnetconn"
+    replace: |
+      DeviceNetworkEvents
+      | where Timestamp > ago(7d)
+      | where RemoteIP == "192.0.2.1"
+      | summarize Connections = count(), FirstSeen = min(Timestamp), LastSeen = max(Timestamp)
+          by DeviceName, InitiatingProcessFileName, RemotePort
+      | sort by Connections desc
+
+  # Where a file hash has been seen
+  - trigger: ":kqlfilehash"
+    replace: |
+      DeviceFileEvents
+      | where Timestamp > ago(30d)
+      | where SHA256 == "<sha256>"
+      | project Timestamp, DeviceName, ActionType, FolderPath, FileName,
+                InitiatingProcessFileName, InitiatingProcessAccountName
+      | sort by Timestamp desc
+
+  # ---------------------------------------------------------------------------
+  # SPLUNK SPL
+  # ---------------------------------------------------------------------------
+
+  # Generic time-bounded search stub
+  - trigger: ":splstart"
+    replace: |
+      index=<index> sourcetype=<sourcetype> earliest=-24h
+      | search <field>="<value>"
+      | table _time host user src dest action
+      | sort - _time
+
+  # Where does an indicator appear at all? (IP, domain, hash, user)
+  - trigger: ":splioc"
+    replace: |
+      index=* earliest=-7d "<indicator>"
+      | stats count min(_time) AS first_seen max(_time) AS last_seen BY index sourcetype host
+      | convert ctime(first_seen) ctime(last_seen)
+      | sort - count
+
+  # Windows failed logons (4625) per user and source
+  - trigger: ":splfailedlogon"
+    replace: |
+      index=wineventlog EventCode=4625 earliest=-24h
+      | stats count AS failures dc(user) AS users values(user) AS targeted BY src
+      | where failures >= 10
+      | sort - failures
+
+  # Process creation on a host (Sysmon event 1)
+  - trigger: ":splproc"
+    replace: |
+      index=sysmon EventCode=1 host="<host>" earliest=-24h
+      | table _time host User ParentImage Image CommandLine
+      | sort - _time
+
+  # Encoded PowerShell (Sysmon event 1)
+  - trigger: ":splencps"
+    replace: |
+      index=sysmon EventCode=1 (Image="*\\powershell.exe" OR Image="*\\pwsh.exe") earliest=-7d
+      | regex CommandLine="(?i)\s[-/]e(c|n[a-z]*)?\s"
+      | table _time host User ParentImage CommandLine

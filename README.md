@@ -45,7 +45,10 @@ espanso restart
 | `ioc.yml`            | IOC blocks, hash templates, defang, threat-intel portal links      |
 | `incidents.yml`      | Incident headers, timelines, playbooks, comms, post-incident docs  |
 | `signatures.yml`     | Email signatures — standard, IR, short, OOO                        |
-| `cli.yml`            | PowerShell, Azure CLI, KQL, Windows/Linux host-triage commands     |
+| `swedish.yml`        | Swedish signatures, OOO, incident notice, status report, phishing reply |
+| `cli.yml`            | PowerShell, Azure CLI, KQL, Windows/Linux/macOS host-triage commands |
+| `detection.yml`      | Hunting queries — KQL (Sentinel / Defender XDR) and Splunk SPL     |
+| `email.yml`          | Phishing triage — header checklist, verdict, reporter reply, purge |
 | `cloud.yml`          | AWS and GCP security / audit CLI commands                          |
 | `network.yml`        | Wireshark/tshark filters, tcpdump, DNS lookups, port reference     |
 | `kubernetes.yml`     | kubectl auditing, container image scanning, Dockerfile hardening   |
@@ -63,7 +66,7 @@ espanso restart
 
 ## Shared values (`shared-vars.yml`)
 
-`signatures.yml`, `ioc.yml`, and `incidents.yml` pull identity/contact fields
+`signatures.yml`, `ioc.yml`, `incidents.yml`, `email.yml` and `swedish.yml` pull identity/contact fields
 (your name, title, org, SOC phone, legal contact, MISP URL, ticket prefix)
 from `shared-vars.yml` via Espanso's `imports:` mechanism instead of
 repeating `[placeholder]` text in every template. **Edit `shared-vars.yml`
@@ -196,6 +199,15 @@ own or are not explicitly authorized to test.
 | `:rootcause`       | Root cause analysis template         |
 | `:sevmatrix`       | Severity / priority definitions      |
 
+### Email / Phishing Triage
+| Trigger         | Output                                          |
+|-----------------|--------------------------------------------------|
+| `:hdrcheck`     | Header analysis checklist                       |
+| `:hdrgrep`      | grep the key headers out of a `.eml`            |
+| `:phishverdict` | Triage verdict for the ticket                   |
+| `:phishreply`   | Reply to the person who reported it             |
+| `:phishpurge`   | Purview compliance search + purge               |
+
 ### Signatures
 | Trigger    | Output                           |
 |------------|-----------------------------------|
@@ -203,6 +215,16 @@ own or are not explicitly authorized to test.
 | `:sigs`    | Short inline signature (uses `shared-vars.yml`)      |
 | `:sigir`   | IR-specific signature + notice (uses `shared-vars.yml`) |
 | `:sigooo`  | Out-of-office escalation footer (uses `shared-vars.yml`) |
+
+### Swedish / Svenska
+| Trigger       | Output                                              |
+|---------------|------------------------------------------------------|
+| `:svsig`      | Signatur, standard (motsvarar `:sig`)               |
+| `:svirsig`    | Signatur för incidenthantering (`:sigir`)           |
+| `:svooo`      | Frånvaromeddelande (`:sigooo`)                      |
+| `:svincident` | Incidentmeddelande till ledning/personal (`:commstemplate`) |
+| `:svlage`     | Lägesrapport under pågående incident (`:sitrep`)    |
+| `:svphish`    | Svar till den som rapporterat ett mejl (`:phishreply`) |
 
 ### CLI — Blue Team / Host Triage
 | Trigger         | Output                                     |
@@ -243,6 +265,35 @@ own or are not explicitly authorized to test.
 | `:sharesenum`    | Enumerate SMB shares                        |
 | `:procnetconn`   | Established TCP connections + process       |
 | `:svcenum`       | List running services                       |
+| `:maclogshow`    | Search the unified log (`/usr/bin/log show`) |
+| `:maclogcollect` | Collect the unified log as evidence         |
+| `:macpersist`    | Non-Apple launch agents/daemons             |
+| `:macbtm`        | Background Task Management dump (13+)       |
+| `:macprofiles`   | Installed configuration profiles            |
+| `:macquarantine` | Download history (quarantine events DB)     |
+| `:mactcc`        | Privacy (TCC) grants; needs Full Disk Access |
+| `:macsign`       | Code signature, notarisation, xattrs        |
+| `:macsecstatus`  | SIP, Gatekeeper, FileVault status           |
+| `:macnet`        | Established TCP connections + process       |
+| `:macusers`      | Local user accounts                         |
+
+### Detection — KQL / SPL
+| Trigger           | Output                                           |
+|-------------------|---------------------------------------------------|
+| `:kqlmfafatigue`  | Repeated MFA failures per user per hour          |
+| `:kqlnewcountry`  | Sign-in from a country new for the user (14 days) |
+| `:kqlconsent`     | OAuth consent grants                             |
+| `:kqlinboxrule`   | New / changed inbox rules                        |
+| `:kqlmailfrom`    | All mail from one sender (campaign scope)        |
+| `:kqlurlclick`    | Who clicked a URL (Safe Links)                   |
+| `:kqlencps`       | Encoded PowerShell command lines                 |
+| `:kqlnetconn`     | Devices that connected to an IP                  |
+| `:kqlfilehash`    | Where a SHA256 was seen                          |
+| `:splstart`       | Generic SPL search stub                          |
+| `:splioc`         | Where an indicator appears (by index/sourcetype) |
+| `:splfailedlogon` | Failed logons (4625) by source                   |
+| `:splproc`        | Sysmon process creation on a host                |
+| `:splencps`       | Encoded PowerShell (Sysmon)                      |
 
 ### Cloud (AWS / GCP)
 | Trigger              | Output                                    |
@@ -427,7 +478,7 @@ own or are not explicitly authorized to test.
 
 ## Notes
 
-- **`shared-vars.yml`**: set `org_name`, `analyst_name`, `analyst_title`, `analyst_email`, `analyst_phone`, `soc_phone`, `legal_contact`, `misp_instance`, and `ticket_prefix` once — `signatures.yml`, `ioc.yml`, and `incidents.yml` all pick the values up automatically via `imports:`.
+- **`shared-vars.yml`**: set `org_name`, `analyst_name`, `analyst_title`, `analyst_email`, `analyst_phone`, `soc_phone`, `legal_contact`, `misp_instance`, and `ticket_prefix` once — `signatures.yml`, `ioc.yml`, `incidents.yml`, `email.yml` and `swedish.yml` all pick the values up automatically via `imports:`.
 - **`:defip` / `:defurl` / `:defemail` / `:refang`** read the clipboard with a shell command. Switch between `pbpaste` (macOS) and `xclip` (Linux) by commenting/uncommenting the appropriate `cmd` line in `ioc.yml` / `encoding.yml`. Defanging is safe to repeat (already-defanged text isn't double-bracketed).
 - **`:utc` / `:iso`** use Espanso's `tz: "UTC"` option, which needs Espanso 2.3.0 or later; older versions silently print local time.
 - **`:mdeisolate` / `:mdeunisolate` / `:mdelive`** call the Defender for Endpoint REST API and expect a bearer token in `$token`.

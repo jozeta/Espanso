@@ -12,7 +12,10 @@ The project has no tagged releases yet, so changes are grouped by date. Entries 
 - Replace `:mdeisolate` and `:mdelive`, which used Graph PowerShell cmdlets that don't exist, with calls to the Defender for Endpoint REST API; add `:mdeunisolate`
 - Add `check.rb` (YAML, unique triggers, prefix overlaps, README coverage, imports, leaked emails/IPs, defang command tests) and a CI workflow that runs it plus ShellCheck
 - Add `install.sh` (copy or `--link`, `--dry-run`, backs up files in the way, never overwrites or links `shared-vars.yml`)
-
+- Add `detection.yml`: KQL hunting queries (MFA fatigue, new sign-in country, OAuth consent, inbox rules, mail from a sender, URL clicks, encoded PowerShell, network connections, file hash) and Splunk SPL equivalents
+- Add `email.yml`: header-analysis checklist, phishing verdict, reply to the reporter, `.eml` header grep and a Purview purge
+- Add macOS host-triage commands to `cli.yml` (`:mac…`: unified log, persistence, Background Task Management, profiles, quarantine history, TCC, code signing, security status)
+- Add `swedish.yml`: Swedish signatures, OOO, incident notice, status report and phishing reply
 - Fix short triggers blocking longer ones: `:d`, `:date`, `:iso`, `:time`, `:timeline`, `:sig` and `:sev` are now word triggers (type a space or punctuation after them), so `:date`, `:defip`, `:dateiso`, `:timewindow`, `:sigir` etc. can be typed again
 - `:genpw` and `:uuid` now work on macOS/Linux by default (`/dev/urandom`, `uuidgen`); the PowerShell versions are kept as comments for Windows
 - Fix the install paths: macOS uses `~/Library/Application Support/espanso/match/`, the stray trailing backslashes are gone, and `espanso path` is mentioned for checking

@@ -16,7 +16,7 @@ installed by `./install.sh`, or by copying them into the Espanso match directory
 One topic per file (`timestamps.yml`, `ioc.yml`, `incidents.yml`, `signatures.yml`, `cli.yml`,
 `cloud.yml`, `network.yml`, `kubernetes.yml`, `secrets.yml`, `encoding.yml`, `vulnmgmt.yml`,
 `compliance.yml`, `pentest.yml`, `wireless-mobile.yml`, `forensics.yml`, `ctf.yml`,
-`nice-to-have.yml`). The README "Files" table and "Quick Reference" list every trigger.
+`detection.yml`, `email.yml`, `swedish.yml`, `nice-to-have.yml`). The README "Files" table and "Quick Reference" list every trigger.
 
 `shared-vars.yml` has no `matches:`; it only defines `global_vars` (org name, analyst
 name/title/email/phone, SOC phone, legal contact, MISP URL, ticket prefix). Files that use them
@@ -35,6 +35,8 @@ start with `imports: ["shared-vars.yml"]` and reference `{{org_name}}` etc.
   comments.
 - `pentest.yml` and `wireless-mobile.yml` are for authorized testing only; keep `TARGET` /
   `ATTACKER_IP` placeholders and never embed real targets.
+- `swedish.yml` mirrors English templates (named in each entry's comment, e.g. `:svsig` ↔ `:sig`);
+  when one side changes, update the other.
 - When adding or renaming a trigger, update the README Quick Reference table (`check.rb` fails
   otherwise).
 - Date variables that claim UTC must set `tz: "UTC"` (Espanso >= 2.3.0); without it Espanso

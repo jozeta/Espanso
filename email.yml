@@ -1,0 +1,86 @@
+# =============================================================================
+# email.yml — Phishing / suspicious email triage
+# Place in: your Espanso match directory (`espanso path` shows the config folder)
+# The intake form for a reported email is :phishreport in incidents.yml.
+# =============================================================================
+
+imports:
+  - "shared-vars.yml"
+
+matches:
+
+  # ---------------------------------------------------------------------------
+  # Header analysis checklist — work through it with the raw headers open
+  # ---------------------------------------------------------------------------
+  - trigger: ":hdrcheck"
+    replace: |
+      Email Header Analysis
+      ---------------------
+      [ ] From vs Return-Path (envelope sender): match?        From:          Return-Path:
+      [ ] Reply-To present and different from From?            Reply-To:
+      [ ] Display name impersonates a person/brand?            Display name:
+      [ ] Authentication-Results:  spf=[pass/fail/softfail/none]  dkim=[pass/fail/none] (d=)  dmarc=[pass/fail/none]
+      [ ] DKIM d= domain aligned with From domain?
+      [ ] Received chain read bottom-up: first external hop     IP:            rDNS:
+      [ ] Sending IP reputation (:abuseipdb / :vt / :talos)
+      [ ] Message-ID domain consistent with sender?             Message-ID:
+      [ ] Sender domain age / lookalike (typosquat, IDN)?       Domain:        Registered:
+      [ ] X-Originating-IP / X-Mailer / X-MS-Exchange-Organization-SCL noted
+      [ ] Links: hover targets vs text, redirectors, URL shorteners (:defurl before sharing)
+      [ ] Attachments: type, SHA256 (:hashblock), macro / archive / HTML smuggling?
+
+  # ---------------------------------------------------------------------------
+  # Verdict write-up for the ticket
+  # ---------------------------------------------------------------------------
+  - trigger: ":phishverdict"
+    replace: |
+      Phishing Triage Verdict — {{ticket_prefix}}XXXX
+      ----------------------------------------------
+      Verdict:          [Malicious / Suspicious / Spam / Benign / Phishing simulation]
+      Category:         [Credential phishing / Malware delivery / BEC / Callback (TOAD) / QR code / Other]
+      Sender:           (display name + address, defanged)
+      Reply-To:
+      Sending IP:
+      SPF / DKIM / DMARC:  [ ] / [ ] / [ ]
+      Subject:
+      Recipients:       [n] (scope via :kqlmailfrom)
+      URLs (defanged):
+      Attachments:      (name — SHA256)
+      Clicked / opened: [n users — via :kqlurlclick] Credentials entered: [Y/N/Unknown]
+      Actions taken:    [Purged / Sender + domain blocked / URLs blocked / Users notified / Passwords reset / Sessions revoked]
+      Analyst:          {{analyst_name}}
+
+  # ---------------------------------------------------------------------------
+  # Reply to the person who reported the email
+  # ---------------------------------------------------------------------------
+  - trigger: ":phishreply"
+    replace: |
+      Hi,
+
+      Thank you for reporting the suspicious email. We have analysed it and assessed it as: [Malicious / Suspicious / Spam / Safe / Phishing simulation].
+
+      [If malicious:] We have removed the message from affected mailboxes and blocked the sender. If you clicked a link, opened an attachment or entered your password, please contact us straight away on {{soc_phone}}.
+
+      [If safe:] The message is legitimate, and you can handle it as normal.
+
+      Please keep reporting emails that look suspicious; it helps us protect {{org_name}}.
+
+      Kind regards,
+      {{analyst_name}}
+
+  # ---------------------------------------------------------------------------
+  # Pull the key headers out of a saved .eml (first line of each header only)
+  # ---------------------------------------------------------------------------
+  - trigger: ":hdrgrep"
+    replace: "grep -iE '^(From|Reply-To|Return-Path|Subject|Date|Message-ID|Authentication-Results|Received-SPF|DKIM-Signature|X-Originating-IP|Received):' message.eml"
+
+  # ---------------------------------------------------------------------------
+  # Purge a phishing email from all mailboxes (Security & Compliance PowerShell,
+  # Connect-IPPSSession first). Check the search results before running the purge.
+  # ---------------------------------------------------------------------------
+  - trigger: ":phishpurge"
+    replace: |
+      New-ComplianceSearch -Name "{{ticket_prefix}}XXXX-purge" -ExchangeLocation All -ContentMatchQuery '(From:sender@example.com) AND (Subject:"<subject>")'
+      Start-ComplianceSearch -Identity "{{ticket_prefix}}XXXX-purge"
+      Get-ComplianceSearch -Identity "{{ticket_prefix}}XXXX-purge" | Format-List Status, Items
+      New-ComplianceSearchAction -SearchName "{{ticket_prefix}}XXXX-purge" -Purge -PurgeType SoftDelete
