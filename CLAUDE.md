@@ -5,8 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 A collection of [Espanso](https://espanso.org/) text-expander match files for blue team
-(SOC/IR/DFIR), red team/pentest and everyday productivity. There's no code: every file is
-Espanso YAML, installed by copying all `.yml` files into the Espanso match directory
+(SOC/IR/DFIR), red team/pentest and everyday productivity. The content is Espanso YAML; the only
+code is `check.rb` (validation, run in CI) and `install.sh` (installer). The `.yml` files are
+installed by `./install.sh`, or by copying them into the Espanso match directory
 (`~/Library/Application Support/espanso/match/` on macOS, `~/.config/espanso/match/` on Linux,
 `%APPDATA%\espanso\match\` on Windows; `espanso path` shows the config folder).
 
@@ -34,15 +35,23 @@ start with `imports: ["shared-vars.yml"]` and reference `{{org_name}}` etc.
   comments.
 - `pentest.yml` and `wireless-mobile.yml` are for authorized testing only; keep `TARGET` /
   `ATTACKER_IP` placeholders and never embed real targets.
-- When adding or renaming a trigger, update the README Quick Reference table.
+- When adding or renaming a trigger, update the README Quick Reference table (`check.rb` fails
+  otherwise).
+- Date variables that claim UTC must set `tz: "UTC"` (Espanso >= 2.3.0); without it Espanso
+  formats local time.
+- Keep `shared-vars.yml` copied, never symlinked, by `install.sh`, so personal values can't end
+  up in the repo.
 
 ## Checking changes
 
-Validate YAML before committing. PyYAML isn't installed on this machine; the system Ruby works:
-`ruby -ryaml -e 'Dir["*.yml"].each{|f| YAML.safe_load(File.read(f))}; puts "ok"'`
-(or `python3 -c "import yaml,glob;[yaml.safe_load(open(f)) for f in glob.glob('*.yml')]"` where
-PyYAML is available). Then with Espanso installed run `espanso restart` and `espanso log` to catch
-load errors.
+Run `ruby check.rb` before committing (plain Ruby, no gems; PyYAML isn't installed here). It
+checks that every file parses, triggers start with `:` and are unique, no trigger is an unguarded
+prefix of another, the README lists exactly the defined triggers, imports resolve, no real-looking
+emails or public IPs slipped into templates, and the clipboard defang/refang commands give the
+expected output. CI (`.github/workflows/ci.yml`) runs it on Ubuntu (GNU sed) plus ShellCheck on
+`install.sh`. When you add a clipboard command or change one, add a case to `CLIP_CASES` in
+`check.rb`. To try matches in Espanso, `./install.sh --link`, then `espanso restart` and
+`espanso log` to catch load errors.
 
 ## App standards
 

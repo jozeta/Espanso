@@ -9,8 +9,7 @@ imports:
 matches:
 
   # ---------------------------------------------------------------------------
-  # Defanged IP placeholder — e.g. 192[.]168[.]1[.]1
-  # Pastes a defanged placeholder to fill in
+  # Defang an IP from the clipboard — 192.168.1.1 -> 192[.]168[.]1[.]1
   # ---------------------------------------------------------------------------
   - trigger: ":defip"
     replace: "{{clipboard}}"
@@ -18,13 +17,16 @@ matches:
       - name: clipboard
         type: shell
         params:
-          # Reads clipboard, replaces dots with [.] for defanging
-          cmd: "pbpaste | sed 's/\\.\\([0-9]\\)/[.]\\1/g; s/^\\([0-9]\\)/\\1/'"
-          # Linux alternative (comment out pbpaste line and use this):
-          # cmd: "xclip -o -selection clipboard | sed 's/\\.\\([0-9]\\)/[.]\\1/g'"
+          # Reads the clipboard and replaces every dot with [.] (safe to run twice)
+          # macOS:
+          cmd: |-
+            pbpaste | sed -E 's/\[\.\]/./g; s/\./[.]/g'
+          # Linux (xclip):
+          # cmd: |-
+          #   xclip -o -selection clipboard | sed -E 's/\[\.\]/./g; s/\./[.]/g'
 
   # ---------------------------------------------------------------------------
-  # Defanged URL placeholder — rewrites http to hxxp, defangs dots
+  # Defang a URL from the clipboard — https://evil.com -> hxxps://evil[.]com
   # ---------------------------------------------------------------------------
   - trigger: ":defurl"
     replace: "{{clipboard}}"
@@ -32,8 +34,29 @@ matches:
       - name: clipboard
         type: shell
         params:
-          cmd: "pbpaste | sed 's/http/hxxp/g; s/\\.\\([a-zA-Z]\\)/[.]\\1/g'"
-          # Linux: cmd: "xclip -o -selection clipboard | sed 's/http/hxxp/g; s/\\.\\([a-zA-Z]\\)/[.]\\1/g'"
+          # http(s):// -> hxxp(s)://, ftp:// -> fxp://, every dot -> [.] (IP URLs too; safe to run twice)
+          # macOS:
+          cmd: |-
+            pbpaste | sed -E 's/\[\.\]/./g; s/[hH][xX][xX][pP]([sS]?):\/\//http\1:\/\//g; s/[hH][tT][tT][pP]([sS]?):\/\//hxxp\1:\/\//g; s/[fF][tT][pP]:\/\//fxp:\/\//g; s/\./[.]/g'
+          # Linux (xclip):
+          # cmd: |-
+          #   xclip -o -selection clipboard | sed -E 's/\[\.\]/./g; s/[hH][xX][xX][pP]([sS]?):\/\//http\1:\/\//g; s/[hH][tT][tT][pP]([sS]?):\/\//hxxp\1:\/\//g; s/[fF][tT][pP]:\/\//fxp:\/\//g; s/\./[.]/g'
+
+  # ---------------------------------------------------------------------------
+  # Refang from the clipboard — undoes [.] (.) [dot] [at] [@] hxxp fxp [://]
+  # ---------------------------------------------------------------------------
+  - trigger: ":refang"
+    replace: "{{clipboard}}"
+    vars:
+      - name: clipboard
+        type: shell
+        params:
+          # macOS:
+          cmd: |-
+            pbpaste | sed -E 's/\[\.\]/./g; s/\(\.\)/./g; s/\[dot\]/./g; s/\[(at|@)\]/@/g; s/[hH][xX][xX][pP]([sS]?):/http\1:/g; s/fxp:\/\//ftp:\/\//g; s/\[:\/\/\]/:\/\//g; s/\[:\]/:/g'
+          # Linux (xclip):
+          # cmd: |-
+          #   xclip -o -selection clipboard | sed -E 's/\[\.\]/./g; s/\(\.\)/./g; s/\[dot\]/./g; s/\[(at|@)\]/@/g; s/[hH][xX][xX][pP]([sS]?):/http\1:/g; s/fxp:\/\//ftp:\/\//g; s/\[:\/\/\]/:\/\//g; s/\[:\]/:/g'
 
   # ---------------------------------------------------------------------------
   # IOC block template — paste into tickets, reports, chat

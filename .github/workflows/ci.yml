@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    # Ubuntu (GNU sed) while local runs on macOS (BSD sed), so the clipboard
+    # defang commands are tested against both.
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Lint the installer (ShellCheck)
+        run: shellcheck install.sh
+      - name: Check match files (YAML, triggers, README, placeholders, defang commands)
+        run: ruby check.rb

@@ -5,7 +5,20 @@ red team / pentest, and everyday productivity use.
 
 ## Installation
 
-Copy all `.yml` files into your Espanso match directory:
+**macOS / Linux:** run the installer from the repo folder:
+
+```
+./install.sh            # copy the files into Espanso's match folder and restart Espanso
+./install.sh --link     # symlink instead, so edits in this repo apply straight away
+./install.sh --dry-run  # show what it would do
+```
+
+It finds the folder with `espanso path`, backs up any different file already in the way
+(as `<name>.yml.bak-<timestamp>`, which Espanso ignores), and never overwrites an
+installed `shared-vars.yml`. That file is always copied, never linked, so the personal
+values you put in it stay out of the repo.
+
+**Windows, or by hand:** copy all `.yml` files into your Espanso match directory:
 
 | OS      | Path                                          |
 |---------|-----------------------------------------------|
@@ -82,8 +95,8 @@ own or are not explicitly authorized to test.
 | Trigger       | Output                          |
 |---------------|----------------------------------|
 | `:date`       | 28 Mar 2026                      |
-| `:utc`        | 28 Mar 2026 14:00 UTC             |
-| `:iso`        | 2026-03-28T14:00:00Z              |
+| `:utc`        | 28 Mar 2026 14:00 UTC (real UTC)  |
+| `:iso`        | 2026-03-28T14:00:00Z (real UTC)   |
 | `:isolocal`   | 2026-03-28T14:00:00 (no offset)   |
 | `:dateiso`    | 2026-03-28                        |
 | `:time`       | 14:00                             |
@@ -99,6 +112,7 @@ own or are not explicitly authorized to test.
 |-----------------|--------------------------------------|
 | `:defip`        | Defang IP from clipboard             |
 | `:defurl`       | Defang URL from clipboard            |
+| `:refang`       | Refang IOCs from clipboard           |
 | `:iocblock`     | Full IOC documentation block         |
 | `:hashblock`    | MD5 / SHA1 / SHA256 block            |
 | `:rfc1918`      | Private IP range reference           |
@@ -199,8 +213,9 @@ own or are not explicitly authorized to test.
 | `:psdisable`     | Disable Entra ID account                    |
 | `:psmfa`         | Get MFA methods for user                    |
 | `:psrole`        | Get directory role members                  |
-| `:mdeisolate`    | MDE device isolation                        |
-| `:mdelive`       | MDE live response command                   |
+| `:mdeisolate`    | MDE device isolation (REST API)             |
+| `:mdeunisolate`  | Release MDE device from isolation           |
+| `:mdelive`       | MDE live response script (REST API)         |
 | `:azlogin`       | az login with tenant                        |
 | `:azsub`         | az account set subscription                 |
 | `:azrole`        | az role assignment list                     |
@@ -413,7 +428,9 @@ own or are not explicitly authorized to test.
 ## Notes
 
 - **`shared-vars.yml`**: set `org_name`, `analyst_name`, `analyst_title`, `analyst_email`, `analyst_phone`, `soc_phone`, `legal_contact`, `misp_instance`, and `ticket_prefix` once — `signatures.yml`, `ioc.yml`, and `incidents.yml` all pick the values up automatically via `imports:`.
-- **`:defip` / `:defurl` / `:defemail`** use shell clipboard commands. Switch between `pbpaste` (macOS) and `xclip` (Linux) by commenting/uncommenting the appropriate `cmd` line in `ioc.yml` / `encoding.yml`.
+- **`:defip` / `:defurl` / `:defemail` / `:refang`** read the clipboard with a shell command. Switch between `pbpaste` (macOS) and `xclip` (Linux) by commenting/uncommenting the appropriate `cmd` line in `ioc.yml` / `encoding.yml`. Defanging is safe to repeat (already-defanged text isn't double-bracketed).
+- **`:utc` / `:iso`** use Espanso's `tz: "UTC"` option, which needs Espanso 2.3.0 or later; older versions silently print local time.
+- **`:mdeisolate` / `:mdeunisolate` / `:mdelive`** call the Defender for Endpoint REST API and expect a bearer token in `$token`.
 - **`:genpw` / `:uuid`** use shell commands that work on macOS and Linux (`/dev/urandom`, `uuidgen`). On Windows, switch to the commented PowerShell `cmd` lines in `nice-to-have.yml`.
 - **Short triggers that start longer ones** (`:d`, `:date`, `:iso`, `:time`, `:timeline`, `:sig`, `:sev`) are word triggers: type a space, Enter or punctuation after them to expand. Without this, Espanso would expand `:d` before you could finish typing `:date` or `:defip`.
 - **Signatures**: Any field not covered by `shared-vars.yml` (team name, PGP key, backup contact) is still a plain `[placeholder]` to fill in per use.

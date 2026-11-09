@@ -38,13 +38,22 @@ matches:
   # POWERSHELL — MDE / Defender
   # ---------------------------------------------------------------------------
 
-  # Isolate a device via MDE (Graph API)
-  - trigger: ":mdeisolate"
-    replace: "Invoke-MgSecurityActionMachineIsolate -MachineId '' -Comment 'IR containment — [INC-XXXX]'"
+  # There are no Graph PowerShell cmdlets for these actions; they are REST calls to the
+  # Defender for Endpoint API (learn.microsoft.com/defender-endpoint/api/isolate-machine).
+  # $token = a bearer token for https://api.securitycenter.microsoft.com with the
+  # Machine.Isolate / Machine.LiveResponse permission.
 
-  # Run live response script on device
+  # Isolate a device via the MDE API (IsolationType: Full | Selective | UnManagedDevice)
+  - trigger: ":mdeisolate"
+    replace: "Invoke-RestMethod -Method Post -Uri 'https://api.security.microsoft.com/api/machines/<machine-id>/isolate' -Headers @{Authorization=\"Bearer $token\"} -ContentType 'application/json' -Body (@{Comment='IR containment — [INC-XXXX]'; IsolationType='Full'} | ConvertTo-Json)"
+
+  # Release a device from isolation
+  - trigger: ":mdeunisolate"
+    replace: "Invoke-RestMethod -Method Post -Uri 'https://api.security.microsoft.com/api/machines/<machine-id>/unisolate' -Headers @{Authorization=\"Bearer $token\"} -ContentType 'application/json' -Body (@{Comment='Released from isolation — [INC-XXXX]'} | ConvertTo-Json)"
+
+  # Run a live response script (from the MDE library) on a device
   - trigger: ":mdelive"
-    replace: "Add-MgSecurityMachineLiveResponseCommand -MachineId '' -Commands @{Type='RunScript'; Params=@{ScriptName=''}}"
+    replace: "Invoke-RestMethod -Method Post -Uri 'https://api.security.microsoft.com/api/machines/<machine-id>/runliveresponse' -Headers @{Authorization=\"Bearer $token\"} -ContentType 'application/json' -Body (@{Comment='[INC-XXXX]'; Commands=@(@{type='RunScript'; params=@(@{key='ScriptName'; value='<script.ps1>'})})} | ConvertTo-Json -Depth 5)"
 
   # ---------------------------------------------------------------------------
   # AZURE CLI

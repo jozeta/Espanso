@@ -63,6 +63,10 @@ matches:
       - name: clipboard
         type: shell
         params:
-          cmd: "pbpaste | sed 's/@/[at]/; s/\\.\\([a-zA-Z]\\)/[.]\\1/g'"
-          # Linux alternative (comment out pbpaste line and use this):
-          # cmd: "xclip -o -selection clipboard | sed 's/@/[at]/; s/\\.\\([a-zA-Z]\\)/[.]\\1/g'"
+          # @ -> [at], every dot -> [.] (safe to run twice)
+          # macOS:
+          cmd: |-
+            pbpaste | sed -E 's/\[\.\]/./g; s/\[(at|@)\]/@/g; s/@/[at]/g; s/\./[.]/g'
+          # Linux (xclip):
+          # cmd: |-
+          #   xclip -o -selection clipboard | sed -E 's/\[\.\]/./g; s/\[(at|@)\]/@/g; s/@/[at]/g; s/\./[.]/g'

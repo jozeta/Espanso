@@ -35,6 +35,7 @@ matches:
         type: date
         params:
           format: "%d %b %Y %H:%M"
+          tz: "UTC"  # needs Espanso >= 2.3.0; older versions ignore it and print local time
 
   # ---------------------------------------------------------------------------
   # ISO 8601 UTC — "2026-03-28T14:00:00Z"
@@ -47,6 +48,7 @@ matches:
         type: date
         params:
           format: "%Y-%m-%dT%H:%M:%S"
+          tz: "UTC"  # needs Espanso >= 2.3.0; older versions ignore it and print local time
 
   # ---------------------------------------------------------------------------
   # Date only, numeric — "2026-03-28"
