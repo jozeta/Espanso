@@ -6,6 +6,8 @@ The project has no tagged releases yet, so changes are grouped by date. Entries 
 
 ## Unreleased
 
+- Tooling only: `tests/run-all.sh` runs `check.rb` and new installer tests (`tests/install.test.sh`: `--version`, `--dry-run`, copy/link, backups; temp dir only); CI runs them and ShellCheck on `install.sh` and the test scripts
+
 ## 1.0.0 - 2026-11-12
 
 First numbered version; the collection had no version before. Changes since the date-based history below:

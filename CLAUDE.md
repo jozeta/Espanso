@@ -46,12 +46,12 @@ start with `imports: ["shared-vars.yml"]` and reference `{{org_name}}` etc.
 
 ## Checking changes
 
-Run `ruby check.rb` before committing (plain Ruby, no gems; PyYAML isn't installed here). It
+Run `bash tests/run-all.sh` (check.rb plus the installer tests in `tests/`) before committing (plain Ruby, no gems; PyYAML isn't installed here). It
 checks that every file parses, triggers start with `:` and are unique, no trigger is an unguarded
 prefix of another, the README lists exactly the defined triggers, imports resolve, no real-looking
 emails or public IPs slipped into templates, and the clipboard defang/refang commands give the
-expected output. CI (`.github/workflows/ci.yml`) runs it on Ubuntu (GNU sed) plus ShellCheck on
-`install.sh`. When you add a clipboard command or change one, add a case to `CLIP_CASES` in
+expected output. CI (`.github/workflows/ci.yml`) runs the suite on Ubuntu (GNU sed) plus ShellCheck on
+`install.sh` and the test scripts. When you add a clipboard command or change one, add a case to `CLIP_CASES` in
 `check.rb`. To try matches in Espanso, `./install.sh --link`, then `espanso restart` and
 `espanso log` to catch load errors.
 

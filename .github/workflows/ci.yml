@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
-      - name: Lint the installer (ShellCheck)
-        run: shellcheck install.sh
-      - name: Check match files (YAML, triggers, README, placeholders, defang commands)
-        run: ruby check.rb
+      - name: Lint the shell scripts (ShellCheck)
+        run: shellcheck install.sh tests/*.sh
+      - name: Tests (check.rb match-file validation + installer tests)
+        run: bash tests/run-all.sh

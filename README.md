@@ -484,6 +484,19 @@ own or are not explicitly authorized to test.
 
 ---
 
+## Development: checks and tests
+
+```sh
+bash tests/run-all.sh                        # everything CI runs (needs ruby)
+ruby check.rb                                # only the match-file validator
+shellcheck install.sh tests/*.sh             # lint the shell scripts
+```
+
+`check.rb` validates the YAML, triggers, README table, placeholders and the clipboard defang commands.
+`tests/install.test.sh` exercises `install.sh` (`--version`, `--dry-run`, copy, `--link`, backups) in a
+temporary folder through `--dir`; your real Espanso folder is never touched. CI
+(`.github/workflows/ci.yml`) runs ShellCheck and `tests/run-all.sh` on Ubuntu.
+
 ## Notes
 
 - **`shared-vars.yml`**: set `org_name`, `analyst_name`, `analyst_title`, `analyst_email`, `analyst_phone`, `soc_phone`, `legal_contact`, `misp_instance`, and `ticket_prefix` once — `signatures.yml`, `ioc.yml`, `incidents.yml`, `email.yml` and `swedish.yml` all pick the values up automatically via `imports:`.
