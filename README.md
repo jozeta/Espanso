@@ -3,6 +3,14 @@
 A set of [Espanso](https://espanso.org/) match files for blue team (SOC / IR / DFIR),
 red team / pentest, and everyday productivity use.
 
+Version: **1.0.0** (`./install.sh --version` prints it)
+
+## What's new in 1.0.0
+
+- First numbered version, with a `VERSION` file and `./install.sh --version`.
+- Fixed `:utc` / `:iso` (real UTC now), the clipboard defang commands, and the Defender for Endpoint isolation matches; added `:refang`, `detection.yml`, `email.yml`, `swedish.yml` and macOS host-triage commands.
+- Added `check.rb` and an installer. Older changes: see [CHANGELOG.md](CHANGELOG.md).
+
 ## Installation
 
 **macOS / Linux:** run the installer from the repo folder:

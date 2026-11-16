@@ -6,6 +6,11 @@ The project has no tagged releases yet, so changes are grouped by date. Entries 
 
 ## Unreleased
 
+## 1.0.0 - 2026-11-12
+
+First numbered version; the collection had no version before. Changes since the date-based history below:
+
+- Add a `VERSION` file (the one version source), `./install.sh --version`, and a version line and "What's new" section in the README
 - Fix `:utc` and `:iso` printing local time labelled as UTC/`Z`; they now use Espanso's `tz: "UTC"` (needs Espanso 2.3.0+)
 - Fix the clipboard defang commands: `:defurl` now defangs IP-based URLs and `ftp://`, only rewrites the `http(s)://` scheme (not "http" inside paths), and `:defip`/`:defurl`/`:defemail` no longer double-bracket text that's already defanged
 - Add `:refang`, which undoes `[.]`, `(.)`, `[dot]`, `[at]`, `hxxp` and `fxp` from the clipboard

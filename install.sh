@@ -6,6 +6,7 @@
 #   ./install.sh --dry-run     show what would happen, change nothing
 #   ./install.sh --dir DIR     install into DIR instead of Espanso's own match folder
 #   ./install.sh --no-restart  don't restart Espanso afterwards
+#   ./install.sh --version     print the version of this collection
 #
 # shared-vars.yml holds your personal values (name, phone, email), so it is always
 # copied, never symlinked (that would put your details in the repo), and an existing
@@ -30,6 +31,7 @@ while [ $# -gt 0 ]; do
     --dir)
       [ $# -ge 2 ] || { echo "--dir needs a folder" >&2; exit 2; }
       dest="$2"; shift ;;
+    --version) cat "$repo/VERSION"; exit 0 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "unknown option: $1" >&2; usage >&2; exit 2 ;;
   esac
